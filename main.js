@@ -1289,6 +1289,7 @@ function goToFight(fight) {
             break;
     };
     enemyGroundCollider=scene.physics.add.collider(enemy, ground);
+    scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
 };
 function initFight() {
     enemyHp=fights[currentFight].hp;
@@ -1360,6 +1361,7 @@ function leaveFight() {
     scene.sound.stopAll();
     music=scene.sound.add("townBgm").setLoop(true);
     music.play();
+    scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
 };
 function loadGameAssets() {
     assetIndex.forEach((asset)=>{
@@ -1434,4 +1436,15 @@ function die() {
     temp2.style["margin-left"]="3px";
     temp2.addEventListener("mousedown", e=>location.reload());
     temp.node.appendChild(temp2);
+};
+function shouldDespawn(o) {
+    // any game object matching any of the conditions in the array will be destroyed upon onion entering/leaving a fight
+    return !![
+        keyTagged(o, "charm"),
+        keyTagged(o, "hyperCharm"),
+        keyTagged(o, "charisma"),
+        keyTagged(o, "hyperCharisma"),
+        keyTagged(o, "slam"),
+        keyTagged(o, "hyperSlam")
+    ].filter(i=>i>0).length;
 };
