@@ -47,4 +47,7 @@
     }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.88.2/phaser.min.js"></script>
-<script src="main.js"></script>
+<script id="gameScript"></script>
+<script>
+    document.getElementById("gameScript").src=`main.js?disableCache=${Date.now()}`;
+</script>
