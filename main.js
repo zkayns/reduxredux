@@ -471,6 +471,7 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/mustardProjectile.png"
     }
 ];
+let T=0;
 let music;
 let onionLanded=false;
 let lastDirection=1;
@@ -748,6 +749,7 @@ GameScene.create=function() {
     music.play();
 };
 GameScene.update=function(t) {
+    T=t;
     playerTouchingBoard=false;
     if (hp<=0) die();
     if (jimOpen) {
@@ -1394,7 +1396,7 @@ function keyTagged(o, k) {
 function playerHit() {
     damageTaken=true;
     hp--;
-    lastPlayerHit=t;
+    lastPlayerHit=T;
     if (playerHitEffect) player.postFX.remove(playerHitEffect);
     playerHitEffect=player.postFX.addGradient(0xffffff, 0xffffff, .75, 0, 0, 1, 1, 0);
 };
