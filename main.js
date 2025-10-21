@@ -883,7 +883,7 @@ GameScene.update=function(t) {
             playerTouchingBoard=Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), board.getBounds());
             playerTouchingJim=Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), daJim.getBounds());
             scene.children.list.forEach(obj=>{
-                if (obj.getData?.("isBoardCharacter")) {
+                if (obj.getData?.("isBoardCharacter")&&!obj.getData("defeated")) {
                     if (Phaser.Geom.Intersects.CircleToRectangle(new Phaser.Geom.Circle(scene.input.mousePointer.x, scene.input.mousePointer.y, 1), obj.getBounds())&&!obj.getData("hasHoverEffect")) {
                         boardHoverEffect=obj.postFX.addGradient(0xffffff, 0xffffff, .75, 0, 0, 1, 1, 0);
                         obj.setData("hasHoverEffect", true);
@@ -1196,15 +1196,24 @@ function tryOpenBoard() {
     temp=scene.add.sprite(142, 196, "burgerIdleL1");
     temp.setData("isBoardCharacter", true);
     temp.scale=1.5;
-    if (beatenEnemies.includes("burgerBot")) temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    if (beatenEnemies.includes("burgerBot")) {
+        temp.setData("defeated", true);
+        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    };
     temp=scene.add.sprite(250, 196, "snowyIdleR1");
     temp.setData("isBoardCharacter", true);
     temp.scale=2;
-    if (beatenEnemies.includes("snowy")) temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    if (beatenEnemies.includes("snowy")) {
+        temp.setData("defeated", true);
+        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    };
     temp=scene.add.sprite(373, 196, "mustard1");
     temp.setData("isBoardCharacter", true);
     temp.scale=2.5;
-    if (beatenEnemies.includes("mustard")) temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    if (beatenEnemies.includes("mustard")) {
+        temp.setData("defeated", true);
+        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    };
 };
 function tryOpenJim() {
     scene.sound.stopAll();
