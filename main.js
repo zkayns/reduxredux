@@ -4,471 +4,471 @@ let assetIndex=[
         name: "Town BGM",
         audio: true,
         id: "townBgm",
-        url: "https://zkayns.github.io/reduxredux/ReduxReduxMenu.mp3"
+        url: "https://zkayns.github.io/reduxredux/assets/ReduxReduxMenu.mp3"
     },
     {
         name: "Burger Bot BGM",
         audio: true,
         id: "burgerBotBgm",
-        url: "https://zkayns.github.io/reduxredux/BurgerBot.mp3"
+        url: "https://zkayns.github.io/reduxredux/assets/BurgerBot.mp3"
     },
     {
         name: "Snowy C BGM",
         audio: true,
         id: "snowyBgm",
-        url: "https://zkayns.github.io/reduxredux/SnowyC.mp3"
+        url: "https://zkayns.github.io/reduxredux/assets/SnowyC.mp3"
     },
     {
         name: "Mustard BGM",
         audio: true,
         id: "mustardBgm",
-        url: "https://zkayns.github.io/reduxredux/SnowyC.mp3"
+        url: "https://zkayns.github.io/reduxredux/assets/SnowyC.mp3"
     },
     {
         name: "Da Jim BGM",
         audio: true,
         id: "jimJam",
-        url: "https://zkayns.github.io/reduxredux/jimJam.mp3"
+        url: "https://zkayns.github.io/reduxredux/assets/jimJam.mp3"
     },
     {
         name: "Town Board",
         id: "townBoard",
-        url: "https://zkayns.github.io/reduxredux/Sign.png"
+        url: "https://zkayns.github.io/reduxredux/assets/Sign.png"
     },
     {
         name: "Board UI",
         id: "boardUi",
-        url: "https://zkayns.github.io/reduxredux/boardUi.png"
+        url: "https://zkayns.github.io/reduxredux/assets/boardUi.png"
     },
     {
         name: "Board Nameplate",
         id: "boardNameplate",
-        url: "https://zkayns.github.io/reduxredux/boardNameplate.svg"
+        url: "https://zkayns.github.io/reduxredux/assets/boardNameplate.svg"
     },
     {
         name: "Board Sheets",
         id: "boardSheets",
-        url: "https://zkayns.github.io/reduxredux/boardSheets.png"
+        url: "https://zkayns.github.io/reduxredux/assets/boardSheets.png"
     },
     {
         name: "Da Jim",
         id: "daJim",
-        url: "https://zkayns.github.io/reduxredux/daJim.png"
+        url: "https://zkayns.github.io/reduxredux/assets/daJim.png"
     },
     {
         name: "Pineapple Who Manages Da Jim",
         id: "pineappleWhoManagesDaJim",
-        url: "https://zkayns.github.io/reduxredux/pineappleWhoManagesDaJim.png"
+        url: "https://zkayns.github.io/reduxredux/assets/pineappleWhoManagesDaJim.png"
     },
     {
         name: "Shield Book",
         id: "shieldBook",
-        url: "https://zkayns.github.io/reduxredux/shieldBook.png"
+        url: "https://zkayns.github.io/reduxredux/assets/shieldBook.png"
     },
     {
         name: "Hyper Shield Book",
         id: "hyperShieldBook",
-        url: "https://zkayns.github.io/reduxredux/hyperShieldBook.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperShieldBook.png"
     },
     {
         name: "Hyper Charm Book",
         id: "hyperCharmBook",
-        url: "https://zkayns.github.io/reduxredux/hyperCharmBook.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperCharmBook.png"
     },
     {
         name: "Double Jump Book",
         id: "doubleJumpBook",
-        url: "https://zkayns.github.io/reduxredux/doubleJumpBook.png"
+        url: "https://zkayns.github.io/reduxredux/assets/doubleJumpBook.png"
     },
     {
         name: "Slam Book",
         id: "slamBook",
-        url: "https://zkayns.github.io/reduxredux/slamBook.png"
+        url: "https://zkayns.github.io/reduxredux/assets/slamBook.png"
     },
     {
         name: "Up Charm Book",
         id: "upCharmBook",
-        url: "https://zkayns.github.io/reduxredux/upCharmBook.png"
+        url: "https://zkayns.github.io/reduxredux/assets/upCharmBook.png"
     },
     {
         name: "Hyper Up Charm Book",
         id: "hyperUpCharmBook",
-        url: "https://zkayns.github.io/reduxredux/hyperUpCharmBook.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperUpCharmBook.png"
     },
     {
         name: "Hyper Slam Book",
         id: "hyperSlamBook",
-        url: "https://zkayns.github.io/reduxredux/hyperSlamBook.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperSlamBook.png"
     },
     {
         name: "Onion Coin",
         id: "onionCoin",
-        url: "https://zkayns.github.io/reduxredux/onionCoin.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionCoin.png"
     },
     {
         name: "Ring Coin",
         id: "ringCoin",
-        url: "https://zkayns.github.io/reduxredux/ringCoin.png"
+        url: "https://zkayns.github.io/reduxredux/assets/ringCoin.png"
     },
     {
         name: "Laser",
         id: "laser",
-        url: "https://zkayns.github.io/reduxredux/laser.png"
+        url: "https://zkayns.github.io/reduxredux/assets/laser.png"
     },
     {
         name: "Charm L",
         id: "charmL",
-        url: "https://zkayns.github.io/reduxredux/charmL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/charmL.png"
     },
     {
         name: "Charm R",
         id: "charmR",
-        url: "https://zkayns.github.io/reduxredux/charmR.png"
+        url: "https://zkayns.github.io/reduxredux/assets/charmR.png"
     },
     {
         name: "Up Charm",
         id: "charmUp",
-        url: "https://zkayns.github.io/reduxredux/charmUp.png"
+        url: "https://zkayns.github.io/reduxredux/assets/charmUp.png"
     },
     {
         name: "Hyper Up Charm",
         id: "hyperCharmUp",
-        url: "https://zkayns.github.io/reduxredux/hyperCharmUp.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperCharmUp.png"
     },
     {
         name: "Hyper Charm L",
         id: "hyperCharmL",
-        url: "https://zkayns.github.io/reduxredux/hyperCharmL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperCharmL.png"
     },
     {
         name: "Hyper Charm R",
         id: "hyperCharmR",
-        url: "https://zkayns.github.io/reduxredux/hyperCharmR.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperCharmR.png"
     },
     {
         name: "Shield L",
         id: "shieldL",
-        url: "https://zkayns.github.io/reduxredux/shieldL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/shieldL.png"
     },
     {
         name: "Shield R",
         id: "shieldR",
-        url: "https://zkayns.github.io/reduxredux/shieldR.png"
+        url: "https://zkayns.github.io/reduxredux/assets/shieldR.png"
     },
     {
         name: "Hyper Shield",
         id: "hyperShield",
-        url: "https://zkayns.github.io/reduxredux/hyperShield.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperShield.png"
     },
     {
         name: "Slam L",
         id: "slamL",
-        url: "https://zkayns.github.io/reduxredux/slamL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/slamL.png"
     },
     {
         name: "Slam R",
         id: "slamR",
-        url: "https://zkayns.github.io/reduxredux/slamR.png"
+        url: "https://zkayns.github.io/reduxredux/assets/slamR.png"
     },
     {
         name: "Hyper Slam L",
         id: "hyperSlamL",
-        url: "https://zkayns.github.io/reduxredux/hyperSlamL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperSlamL.png"
     },
     {
         name: "Hyper Slam R",
         id: "hyperSlamR",
-        url: "https://zkayns.github.io/reduxredux/hyperSlamR.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperSlamR.png"
     },
     {
         name: "Robo Shockwave L",
         id: "roboShockwaveL",
-        url: "https://zkayns.github.io/reduxredux/roboShockwaveL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/roboShockwaveL.png"
     },
     {
         name: "Robo Shockwave R",
         id: "roboShockwaveR",
-        url: "https://zkayns.github.io/reduxredux/roboShockwaveR.png"
+        url: "https://zkayns.github.io/reduxredux/assets/roboShockwaveR.png"
     },
     {
         name: "Charisma L",
         id: "charismaL",
-        url: "https://zkayns.github.io/reduxredux/charismaL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/charismaL.png"
     },
     {
         name: "Charisma R",
         id: "charismaR",
-        url: "https://zkayns.github.io/reduxredux/charismaR.png"
+        url: "https://zkayns.github.io/reduxredux/assets/charismaR.png"
     },
     {
         name: "Hyper Charisma L",
         id: "hyperCharismaL",
-        url: "https://zkayns.github.io/reduxredux/hyperCharismaL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperCharismaL.png"
     },
     {
         name: "Hyper Charisma R",
         id: "hyperCharismaR",
-        url: "https://zkayns.github.io/reduxredux/hyperCharismaR.png"
+        url: "https://zkayns.github.io/reduxredux/assets/hyperCharismaR.png"
     },
     {
         name: "Onion Idle R 1",
         id: "onionIdleR1",
-        url: "https://zkayns.github.io/reduxredux/onionIdleR1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionIdleR1.png"
     },
     {
         name: "Onion Idle R 2",
         id: "onionIdleR2",
-        url: "https://zkayns.github.io/reduxredux/onionIdleR2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionIdleR2.png"
     },
     {
         name: "Onion Idle L 1",
         id: "onionIdleL1",
-        url: "https://zkayns.github.io/reduxredux/onionIdleL1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionIdleL1.png"
     },
     {
         name: "Onion Idle L 2",
         id: "onionIdleL2",
-        url: "https://zkayns.github.io/reduxredux/onionIdleL2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionIdleL2.png"
     },
     {
         name: "Onion Walk R 1",
         id: "onionWalkR1",
-        url: "https://zkayns.github.io/reduxredux/onionWalkR1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionWalkR1.png"
     },
     {
         name: "Onion Walk R 2",
         id: "onionWalkR2",
-        url: "https://zkayns.github.io/reduxredux/onionWalkR2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionWalkR2.png"
     },
     {
         name: "Onion Walk R 3",
         id: "onionWalkR3",
-        url: "https://zkayns.github.io/reduxredux/onionWalkR3.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionWalkR3.png"
     },
     {
         name: "Onion Walk L 1",
         id: "onionWalkL1",
-        url: "https://zkayns.github.io/reduxredux/onionWalkL1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionWalkL1.png"
     },
     {
         name: "Onion Walk L 2",
         id: "onionWalkL2",
-        url: "https://zkayns.github.io/reduxredux/onionWalkL2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionWalkL2.png"
     },
     {
         name: "Onion Walk L 3",
         id: "onionWalkL3",
-        url: "https://zkayns.github.io/reduxredux/onionWalkL3.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionWalkL3.png"
     },
     {
         name: "Onion Broger 1",
         id: "onionBroger1",
-        url: "https://zkayns.github.io/reduxredux/onionBroger1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionBroger1.png"
     },
     {
         name: "Onion Broger 2",
         id: "onionBroger2",
-        url: "https://zkayns.github.io/reduxredux/onionBroger2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionBroger2.png"
     },
     {
         name: "Onion Confused 1",
         id: "onionConfused1",
-        url: "https://zkayns.github.io/reduxredux/onionConfused1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionConfused1.png"
     },
     {
         name: "Onion Confused 2",
         id: "onionConfused2",
-        url: "https://zkayns.github.io/reduxredux/onionConfused2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionConfused2.png"
     },
     {
         name: "Onion Dies L",
         id: "onionDiesL",
-        url: "https://zkayns.github.io/reduxredux/onionDiesL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionDiesL.png"
     },
     {
         name: "Onion Dies R",
         id: "onionDiesR",
-        url: "https://zkayns.github.io/reduxredux/onionDiesR.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionDiesR.png"
     },
     {
         name: "Onion Hmmm 1",
         id: "onionHmmm1",
-        url: "https://zkayns.github.io/reduxredux/onionHmmm1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionHmmm1.png"
     },
     {
         name: "Onion Hmmm 2",
         id: "onionHmmm2",
-        url: "https://zkayns.github.io/reduxredux/onionHmmm2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionHmmm2.png"
     },
     {
         name: "Onion Hug",
         id: "onionHug",
-        url: "https://zkayns.github.io/reduxredux/onionHug.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionHug.png"
     },
     {
         name: "Onion No",
         id: "onionNo",
-        url: "https://zkayns.github.io/reduxredux/onionNo.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionNo.png"
     },
     {
         name: "Onion Yes 1",
         id: "onionYes1",
-        url: "https://zkayns.github.io/reduxredux/onionYes1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionYes1.png"
     },
     {
         name: "Onion Yes 2",
         id: "onionYes2",
-        url: "https://zkayns.github.io/reduxredux/onionYes2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionYes2.png"
     },
     {
         name: "Onion Whatever 1",
         id: "onionWhatever1",
-        url: "https://zkayns.github.io/reduxredux/onionWhatever1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionWhatever1.png"
     },
     {
         name: "Onion Whatever 2",
         id: "onionWhatever2",
-        url: "https://zkayns.github.io/reduxredux/onionWhatever2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionWhatever2.png"
     },
     {
         name: "Onion No Broger 1",
         id: "onionNoBroger1",
-        url: "https://zkayns.github.io/reduxredux/onionNoBroger1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionNoBroger1.png"
     },
     {
         name: "Onion No Broger 2",
         id: "onionNoBroger2",
-        url: "https://zkayns.github.io/reduxredux/onionNoBroger2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionNoBroger2.png"
     },
     {
         name: "Onion Wit Da Dookie 1",
         id: "onionWitDaDookie1",
-        url: "https://zkayns.github.io/reduxredux/onionWitDaDookie1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionWitDaDookie1.png"
     },
     {
         name: "Onion Wit Da Dookie 2",
         id: "onionWithDaDookie2",
-        url: "https://zkayns.github.io/reduxredux/onionWitDaDookkie2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/onionWitDaDookkie2.png"
     },
     {
         name: "Burger Bot Idle L 1",
         id: "burgerIdleL1",
-        url: "https://zkayns.github.io/reduxredux/burgerIdleL1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/burgerIdleL1.png"
     },
     {
         name: "Burger Bot Idle L 2",
         id: "burgerIdleL2",
-        url: "https://zkayns.github.io/reduxredux/burgerIdleL2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/burgerIdleL2.png"
     },
     {
         name: "Burger Bot Anger L",
         id: "burgerAngerL",
-        url: "https://zkayns.github.io/reduxredux/burgerAngerL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/burgerAngerL.png"
     },
     {
         name: "Burger Bot Anger R",
         id: "burgerAngerR",
-        url: "https://zkayns.github.io/reduxredux/burgerAngerR.png"
+        url: "https://zkayns.github.io/reduxredux/assets/burgerAngerR.png"
     },
     {
         name: "Burger Bot Bout To Scream L",
         id: "burgerBoutToScreamL",
-        url: "https://zkayns.github.io/reduxredux/burgerBoutToScreamL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/burgerBoutToScreamL.png"
     },
     {
         name: "Burger Bot Scream L",
         id: "burgerScreamL",
-        url: "https://zkayns.github.io/reduxredux/burgerScreamL.png"
+        url: "https://zkayns.github.io/reduxredux/assets/burgerScreamL.png"
     },
     {
         name: "Burger Bot Death Cry",
         id: "burgerDeathCry",
-        url: "https://zkayns.github.io/reduxredux/burgerDeathCry.png"
+        url: "https://zkayns.github.io/reduxredux/assets/burgerDeathCry.png"
     },
     {
         name: "Snowy Idle L 1",
         id: "snowyIdleL1",
-        url: "https://zkayns.github.io/reduxredux/snowyIdleL1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyIdleL1.png"
     },
     {
         name: "Snowy Idle L 2",
         id: "snowyIdleL2",
-        url: "https://zkayns.github.io/reduxredux/snowyIdleL2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyIdleL2.png"
     },
     {
         name: "Snowy Idle R 1",
         id: "snowyIdleR1",
-        url: "https://zkayns.github.io/reduxredux/snowyIdleR1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyIdleR1.png"
     },
     {
         name: "Snowy Idle R 2",
         id: "snowyIdleR2",
-        url: "https://zkayns.github.io/reduxredux/snowyIdleR2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyIdleR2.png"
     },
     {
         name: "Snowy Walk R 1",
         id: "snowyWalkR1",
-        url: "https://zkayns.github.io/reduxredux/snowyWalkR1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyWalkR1.png"
     },
     {
         name: "Snowy Walk R 2",
         id: "snowyWalkR2",
-        url: "https://zkayns.github.io/reduxredux/snowyWalkR2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyWalkR2.png"
     },
     {
         name: "Snowy Walk R 3",
         id: "snowyWalkR3",
-        url: "https://zkayns.github.io/reduxredux/snowyWalkR3.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyWalkR3.png"
     },
     {
         name: "Snowy Walk L 1",
         id: "snowyWalkL1",
-        url: "https://zkayns.github.io/reduxredux/snowyWalkL1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyWalkL1.png"
     },
     {
         name: "Snowy Walk L 2",
         id: "snowyWalkL2",
-        url: "https://zkayns.github.io/reduxredux/snowyWalkL2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyWalkL2.png"
     },
     {
         name: "Snowy Walk L 3",
         id: "snowyWalkL3",
-        url: "https://zkayns.github.io/reduxredux/snowyWalkL3.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyWalkL3.png"
     },
     {
         name: "Snowy Loser 1",
         id: "snowyLoser1",
-        url: "https://zkayns.github.io/reduxredux/snowyLoser1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyLoser1.png"
     },
     {
         name: "Snowy Loser 2",
         id: "snowyLoser2",
-        url: "https://zkayns.github.io/reduxredux/snowyLoser2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/snowyLoser2.png"
     },
     {
         name: "Mustard 1",
         id: "mustard1",
-        url: "https://zkayns.github.io/reduxredux/mustard1.png"
+        url: "https://zkayns.github.io/reduxredux/assets/mustard1.png"
     },
     {
         name: "Mustard 2",
         id: "mustard2",
-        url: "https://zkayns.github.io/reduxredux/mustard2.png"
+        url: "https://zkayns.github.io/reduxredux/assets/mustard2.png"
     },
     {
         name: "Mustard Dead",
         id: "mustardDead",
-        url: "https://zkayns.github.io/reduxredux/mustardDead.png"
+        url: "https://zkayns.github.io/reduxredux/assets/mustardDead.png"
     },
     {
         name: "Ketchup Projectile",
         id: "ketchupProjectile",
-        url: "https://zkayns.github.io/reduxredux/ketchupProjectile.png"
+        url: "https://zkayns.github.io/reduxredux/assets/ketchupProjectile.png"
     },
     {
         name: "Mustard Projectile",
         id: "mustardProjectile",
-        url: "https://zkayns.github.io/reduxredux/mustardProjectile.png"
+        url: "https://zkayns.github.io/reduxredux/assets/mustardProjectile.png"
     }
 ];
 let T=0;
