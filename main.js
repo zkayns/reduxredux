@@ -873,6 +873,7 @@ GameScene.update=function(t) {
         temp.y=ground.body.top-temp.body.height/1.333;
         scene.physics.add.collider(ground, temp);
     };
+    if (playerHitEffect&&t-lastPlayerHit>200) player.postFX.remove(playerHitEffect);
     switch (onionLocation) {
         case "town":
             playerTouchingBoard=Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), board.getBounds());
