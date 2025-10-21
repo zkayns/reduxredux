@@ -1219,7 +1219,7 @@ function tryOpenJim() {
         temp2.style["padding"]="6px";
         temp2.addEventListener("mousedown", (e)=>{
             temp=e.target.id.split("_")[1];
-            if (shopItems[temp].cost<=coins&&!shopItems[temp].requires?.map(r=>boughtShopItems.includes(r)).filter(r=>r==0).length) {
+            if (shopItems[temp].cost<=coins&&!shopItems[temp].requires?.filter(r=>!boughtShopItems.includes(r)).length) {
                 coins-=shopItems[temp].cost;
                 boughtShopItems.push(temp);
                 e?.target?.remove();
