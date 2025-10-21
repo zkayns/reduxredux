@@ -492,6 +492,7 @@ let sinceLastCharm=charmCooldown;
 let inCredits=false;
 let boardUi;
 let boardOpen=false;
+let boardHoverEffect;
 let canMove=true;
 let playerTouchingBoard=false;
 let playerTouchingJim=false;
@@ -569,6 +570,7 @@ let GameScene={
 let fights={
     burgerBot: {
         name: "Burger Bot",
+        spriteTag: "burger",
         hp: 20,
         startX: 512,
         startY: 344,
@@ -577,6 +579,7 @@ let fights={
     },
     snowy: {
         name: "Snowy C",
+        spriteTag: "snowy",
         hp: 10,
         startX: 512,
         startY: 344,
@@ -585,6 +588,7 @@ let fights={
     },
     mustard: {
         name: "Musturd",
+        spriteTag: "mustard",
         hp: 15,
         startX: 512,
         startY: 344,
@@ -878,6 +882,18 @@ GameScene.update=function(t) {
         case "town":
             playerTouchingBoard=Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), board.getBounds());
             playerTouchingJim=Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), daJim.getBounds());
+            scene.children.list.forEach(obj=>{
+                if (obj.getData?.("isBoardCharacter")) {
+                    if (Phaser.Geom.Intersects.CircleToRectangle(new Phaser.Geom.Circle(scene.input.mousePointer.x, scene.input.mousePointer.y, 1), obj.getBounds())&&!obj.getData("hasHoverEffect")) {
+                        boardHoverEffect=obj.postFX.addGradient(0xffffff, 0xffffff, .75, 0, 0, 1, 1, 0);
+                        obj.setData("hasHoverEffect", true);
+                    };
+                    if (obj.getData("hasHoverEffect")&&!Phaser.Geom.Intersects.CircleToRectangle(new Phaser.Geom.Circle(scene.input.mousePointer.x, scene.input.mousePointer.y, 1), obj.getBounds())) {
+                        obj.postFX.clear();
+                        obj.setData("hasHoverEffect", false);  
+                    };
+                };
+            });
             break;
         default:
             if (!transitioningIntoFight&&enemyHp>0&&!dead) {
@@ -1181,7 +1197,7 @@ function tryOpenBoard() {
     temp.setData("isBoardCharacter", true);
     temp.scale=1.5;
     if (beatenEnemies.includes("burgerBot")) temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
-    temp=scene.add.sprite(250, 196, "snowyIdleL1");
+    temp=scene.add.sprite(250, 196, "snowyIdleR1");
     temp.setData("isBoardCharacter", true);
     temp.scale=2;
     if (beatenEnemies.includes("snowy")) temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
