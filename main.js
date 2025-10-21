@@ -1446,5 +1446,5 @@ function shouldDespawn(o) {
         keyTagged(o, "hyperCharisma"),
         keyTagged(o, "slam"),
         keyTagged(o, "hyperSlam")
-    ].filter(i=>i>0).length;
+    ].filter(i=>!!i).length;
 };
