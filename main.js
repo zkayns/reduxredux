@@ -61,6 +61,11 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/pineappleWhoManagesDaJim.png"
     },
     {
+        name: "Extra Life",
+        id: "extraLife",
+        url: "https://zkayns.github.io/reduxredux/assets/extraLife.png"
+    },
+    {
         name: "Shield Book",
         id: "shieldBook",
         url: "https://zkayns.github.io/reduxredux/assets/shieldBook.png"
@@ -630,7 +635,7 @@ let fights={
     snowy: {
         name: "Snowy C",
         spriteTag: "snowy",
-        hp: 10,
+        hp: 12,
         startX: 512,
         startY: 344,
         startSpriteKey: "snowyIdleL1",
@@ -660,6 +665,13 @@ let splashes=[
     "Goober"
 ];
 let shopItems={
+    extraLife: {
+        name: "Extra Life",
+        spriteKey: "extraLife",
+        description: "Makes you not die by giving you 3 HP. Cap still applies",
+        cost: 1,
+        rebuyable: true
+    },
     shield: {
         name: "Shield",
         spriteKey: "shieldBook",
@@ -1149,7 +1161,7 @@ function leaveCredits() {
 };
 function keyDown(e) {
     keys.push(e.key);  
-    if (canMove) {
+    if (canMove&&player) {
         controls.player.jump.includes(e.key)?tryJump():"";
         controls.player.moveRight.includes(e.key)?lastDirection=1:"";
         controls.player.moveLeft.includes(e.key)?lastDirection=0:"";
@@ -1256,10 +1268,6 @@ function tryOpenBoard() {
         return false;
     };
     boardOpen=true;
-    /*
-    boardUi=scene.add.dom(scene.game.canvas.width/2, scene.game.canvas.height/2, "div", "width: 75%; height: 50%; background-color: brown; border: 1px solid black; font-family: monospace", "");
-    Object.keys(fights).forEach(f=>{boardUi.node.innerHTML+=`<button onclick="goToFight('${f}')">${f}</button>`});
-    */
     boardUi=scene.add.sprite(scene.game.canvas.width/2, scene.game.canvas.height/2, "boardUi");
     boardUi.scale=.66;
     temp=scene.add.sprite(142, 196, "burgerIdleL1");
@@ -1311,13 +1319,25 @@ function tryOpenJim() {
         temp2.src=assetIndex.filter(a=>a.id==item.spriteKey)[0].url;
         temp2.style["height"]="48px";
         temp2.style["padding"]="6px";
+        if (i=="extraLife") {
+            temp2.style["padding-left"]="10.5px";
+            temp2.style["padding-right"]="10.5px";
+        };
         temp2.addEventListener("mousedown", (e)=>{
             temp=e.target.id.split("_")[1];
             if (shopItems[temp].cost<=coins&&!shopItems[temp].requires?.filter(r=>!boughtShopItems.includes(r)).length) {
-                if (temp=="devil") maxHp-=3;
+                if (temp=="devil") {
+                    fights["snowy"].hp-=3;
+                    maxHp-=3;
+                };
+                if (temp=="extraLife") {
+                    hp=Math.min(hp+3, maxHp);
+                };
                 coins-=shopItems[temp].cost;
-                boughtShopItems.push(temp);
-                e?.target?.remove();
+                if (!shopItems[temp]?.rebuyable) {
+                    boughtShopItems.push(temp);
+                    e?.target?.remove();
+                };
             };
         });
         temp2.className="jimItem";
