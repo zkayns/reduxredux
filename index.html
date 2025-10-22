@@ -18,6 +18,10 @@
     img {
         image-rendering: pixelated;
     }
+    .jimItem {
+        min-height: 56px;
+        max-height: 56px;
+    }
     .jimItem:hover {
         filter: brightness(150%);
     }
@@ -44,6 +48,14 @@
         top: 50%;
         left: 50%;
         transform: translateX(-50%) translateY(-50%);
+    }
+    .jimItemContainer {
+        min-width: 64px;
+        min-height: 64px;
+        max-width: 64px;
+        max-height: 64px;
+        text-align: center;
+        vertical-align: middle;
     }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.88.2/phaser.min.js"></script>
