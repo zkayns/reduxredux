@@ -181,6 +181,11 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/hyperShield.png"
     },
     {
+        name: "Devil Shield",
+        id: "devilShield",
+        url: "https://zkayns.github.io/reduxredux/assets/devilShield.png"
+    },
+    {
         name: "Shockwave L",
         id: "shockwaveL",
         url: "https://zkayns.github.io/reduxredux/assets/shockwaveL.png"
@@ -711,7 +716,7 @@ let shopItems={
         spriteKey: "devilBook",
         description: "Makes you and your attacks faster at the cost of 3 HP cap",
         cost: 3,
-        requires: ["hyperSlam", "hyperCharm"]
+        requires: ["hyperSlam", "hyperCharm", "hyperShield"]
     }
 }
 let config={
@@ -808,6 +813,7 @@ GameScene.update=function(t) {
     T=t;
     playerTouchingBoard=false;
     if (hp<=0) die();
+    if (hp>maxHp) hp=maxHp;
     if (boughtShopItems.includes("devil")&&!devilCreated) {
         devilCreated=true;
         temp=scene.physics.add.sprite(player.x, player.y, "devilR");
@@ -838,7 +844,7 @@ GameScene.update=function(t) {
         player.rotation+=1;
         enemy.rotation+=currentFight=="snowy";
     };
-    scene.children.list.filter(obj=>keyTagged(obj, "charm")||keyTagged(obj, "hyperCharm")||keyTagged(obj, "devilCharm")).forEach(charm=>{
+    scene.children.list.filter(obj=>isCharm(obj)).forEach(charm=>{
         scene.physics.overlap(charm, enemy, ()=>{
             charm?.destroy();
             enemyHit(t);
@@ -846,14 +852,14 @@ GameScene.update=function(t) {
         charm?.body?.left>scene.game.canvas.width||charm?.body?.right<0||charm?.body?.bottom<0||charm?.body?.top>scene.game.canvas.height?charm?.destroy():"";
     });
     scene.children.list.filter(obj=>keyTagged(obj, "charisma")||keyTagged(obj, "hyperCharisma")).forEach(charisma=>{
-        scene.children.list.filter(obj=>keyTagged(obj, "shield")||keyTagged(obj, "hyperShield")).forEach(shield=>scene.physics.overlap(shield, charisma, ()=>charisma?.destroy()));
+        scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>scene.physics.overlap(shield, charisma, ()=>charisma?.destroy()));
         scene.physics.overlap(charisma, player, ()=>{
             charisma?.destroy();
             playerHit();
         });
         charisma?.body?.left>scene.game.canvas.width||charisma?.body?.right<0?charisma?.destroy():"";
     });
-    scene.children.list.filter(obj=>keyTagged(obj, "shockwave")||keyTagged(obj, "hyperShockwave")||keyTagged(obj, "devilShockwave")).forEach(shockwave=>{
+    scene.children.list.filter(obj=>isPlayerShockwave(obj)).forEach(shockwave=>{
         scene.physics.overlap(shockwave, enemy, ()=>{
             shockwave?.destroy();
             enemyHit(t);
@@ -867,7 +873,7 @@ GameScene.update=function(t) {
         });
         roboShockwave?.body?.left>scene.game.canvas.width||roboShockwave?.body?.right<0?roboShockwave?.destroy():"";
     });
-    scene.children.list.filter(obj=>keyTagged(obj, "shield")||keyTagged(obj, "hyperShield")).forEach(shield=>{
+    scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{
         shield.setFlip(lastDirection);
         shield.x=player.x+(lastDirection?30:-30)*keyTagged(shield, "shield");
         shield.y=Math.min(player.y, ground.body.top-shield.height/2);
@@ -888,7 +894,7 @@ GameScene.update=function(t) {
                 laser?.destroy();
                 playerHit();
             });
-            scene.children.list.filter(obj=>keyTagged(obj, "shield")||keyTagged(obj, "hyperShield")).forEach(shield=>{scene.physics.overlap(laser, shield, ()=>{laser?.destroy()})});
+            scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{scene.physics.overlap(laser, shield, ()=>{laser?.destroy()})});
         };
         laser?.body?.left>scene.game.canvas.width||laser?.body?.right<0?laser?.destroy():"";
     });
@@ -900,8 +906,8 @@ GameScene.update=function(t) {
         };
         if (mustard.scale<=0) mustard?.destroy();
     });
-    scene.children.list.filter(obj=>keyTagged(obj, "devil")).forEach(devil=>{
-        devil.x=player.getTopLeft().x;
+    scene.children.list.filter(obj=>keyTagged(obj, "devil", 6)).forEach(devil=>{
+        devil.x=lastDirection?player.getTopLeft().x:player.getTopRight().x;
         devil.y=player.getTopLeft().y;
     });
     canMove=!(jimOpen+transitioningIntoFight+boardOpen+dead);
@@ -925,7 +931,7 @@ GameScene.update=function(t) {
         temp=scene.physics.add.sprite(player.x, player.y, `${getType("shockwave")}L`);
         temp.scaleX=1.5;
         temp.scaleY=1.5;
-        temp.body.velocity.x=-400*(boughtShopItems.includes("hyperSlam")+1);
+        temp.body.velocity.x=-400*(boughtShopItems.includes("hyperSlam")+boughtShopItems.includes("devil")+1);
         temp.body.drag=1;
         temp.body.allowGravity=false;
         temp.y=ground.body.top-temp.body.height/1.333;
@@ -933,7 +939,7 @@ GameScene.update=function(t) {
         temp=scene.physics.add.sprite(player.x, player.y, `${getType("shockwave")}R`);
         temp.scaleX=1.5;
         temp.scaleY=1.5;
-        temp.body.velocity.x=400*(boughtShopItems.includes("hyperSlam")+1);
+        temp.body.velocity.x=400*(boughtShopItems.includes("hyperSlam")+boughtShopItems.includes("devil")+1);
         temp.body.drag=1;
         temp.body.allowGravity=false;
         temp.y=ground.body.top-temp.body.height/1.333;
@@ -1187,7 +1193,7 @@ function tryCharm() {
     temp.scaleX=1.5;
     temp.scaleY=1.5;
     temp.body.allowGravity=false;
-    temp.setVelocityX(Math.sign(lastDirection-.5)*260*(boughtShopItems.includes("hyperCharm")+1));
+    temp.setVelocityX(Math.sign(lastDirection-.5)*260*(boughtShopItems.includes("hyperCharm")+boughtShopItems.includes("devil")+1));
     temp.body.drag=1;
     sinceLastCharm=0;
     if (currentFight=="snowy"&&enemyHp>0) {
@@ -1197,7 +1203,7 @@ function tryCharm() {
         temp.scaleX=1.5;
         temp.scaleY=1.5;
         temp.body.allowGravity=false;
-        temp.setVelocityX(Math.sign(!lastDirection-.5)*260*(boughtShopItems.includes("hyperCharm")+1));
+        temp.setVelocityX(Math.sign(!lastDirection-.5)*(260*(boughtShopItems.includes("hyperCharm")+boughtShopItems.includes("devil")+1)));
         temp.body.drag=1;
     };
 };
@@ -1209,12 +1215,13 @@ function tryCharmUp() {
     temp.scaleX=1.5;
     temp.scaleY=1.5;
     temp.body.allowGravity=false;
-    temp.setVelocityY(-260*(boughtShopItems.includes("hyperUpCharm")+1));
+    temp.setVelocityY(-260*(boughtShopItems.includes("hyperUpCharm")+boughtShopItems.includes("devil")+1));
     temp.body.drag=1;
     sinceLastUpCharm=0;
 };
 function tryShield() {
-    if (sinceLastShield>shieldCooldown&&boughtShopItems.includes("shield")&&!boughtShopItems.includes("hyperShield")) { // SHIELD
+    if (!boughtShopItems.includes("shield")) return false;
+    if (sinceLastShield>shieldCooldown&&getType("shield")=="shield") { // SHIELD
         sinceLastShield=0;
         temp=scene.physics.add.sprite(player.x, player.y, `shieldL`);
         temp.body.allowGravity=false;
@@ -1222,9 +1229,9 @@ function tryShield() {
         temp.height*=1.5;
         temp.displayWidth*=1.5;
         temp.displayHeight*=1.5;
-    } else if (sinceLastShield>shieldCooldown&&boughtShopItems.includes("shield")) { // HYPER SHIELD
+    } else if (sinceLastShield>shieldCooldown&&(getType("shield")=="hyperShield"||getType("shield")=="devilShield")) {
         sinceLastShield=0;
-        temp=scene.physics.add.sprite(player.x, player.y, "hyperShield");
+        temp=scene.physics.add.sprite(player.x, player.y, getType("shield"));
         temp.body.allowGravity=false;
         temp.width*=3;
         temp.height*=3;
@@ -1307,6 +1314,7 @@ function tryOpenJim() {
         temp2.addEventListener("mousedown", (e)=>{
             temp=e.target.id.split("_")[1];
             if (shopItems[temp].cost<=coins&&!shopItems[temp].requires?.filter(r=>!boughtShopItems.includes(r)).length) {
+                if (temp=="devil") maxHp-=3;
                 coins-=shopItems[temp].cost;
                 boughtShopItems.push(temp);
                 e?.target?.remove();
@@ -1480,8 +1488,8 @@ function enemyHit(t) {
     if (hitEffect) enemy.postFX.remove(hitEffect);
     hitEffect=enemy.postFX.addGradient(0xffffff, 0xffffff, .75, 0, 0, 1, 1, 0);
 };
-function keyTagged(o, k) {
-    return o.texture?.key?.slice(0, k.length)==k;
+function keyTagged(o, k, len) {
+    return o.texture?.key?.slice(0, k.length)==k&&o.texture?.key?.length<=(len||Infinity);
 };
 function playerHit() {
     damageTaken=true;
@@ -1529,12 +1537,23 @@ function shouldDespawn(o) {
     return !![
         keyTagged(o, "charm"),
         keyTagged(o, "hyperCharm"),
+        keyTagged(o, "devilCharm"),
         keyTagged(o, "charisma"),
         keyTagged(o, "hyperCharisma"),
-        keyTagged(o, "slam"),
-        keyTagged(o, "hyperShockwave")
+        keyTagged(o, "shockwave"),
+        keyTagged(o, "hyperShockwave"),
+        keyTagged(o, "devilShockwave")
     ].filter(i=>!!i).length;
 };
+function isCharm(o) {
+    return keyTagged(o, "charm")||keyTagged(o, "hyperCharm")||keyTagged(o, "devilCharm");
+};
+function isShield(o) {
+    return keyTagged(o, "shield")||keyTagged(o, "hyperShield")||keyTagged(o, "devilShield");
+};
+function isPlayerShockwave(o) {
+    return keyTagged(o, "shockwave")||keyTagged(o, "hyperShockwave")||keyTagged(o, "devilShockwave");
+}
 function getType(thing) {
     switch (thing) {
         case "charm":
@@ -1543,12 +1562,16 @@ function getType(thing) {
             return "charm";
         case "upCharm":
             if (boughtShopItems.includes("devil")) return "devilCharmUp";
-            if (boughtShopitems.includes("hyperUpCharm")) return "hyperCharmUp";
+            if (boughtShopItems.includes("hyperUpCharm")) return "hyperCharmUp";
             return "charmUp";
         case "shockwave":
             if (boughtShopItems.includes("devil")) return "devilShockwave";
-            if (boughtShopitems.includes("hyperSlam")) return "hyperShockwave";
+            if (boughtShopItems.includes("hyperSlam")) return "hyperShockwave";
             return "shockwave";
+        case "shield":
+            if (boughtShopItems.includes("devil")) return "devilShield";
+            if (boughtShopItems.includes("hyperShield")) return "hyperShield";
+            return "shield";
         case "charisma":
             if (boughtShopItems.includes("hyperCharm")) return "hyperCharisma";
             return "charisma";
