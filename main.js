@@ -834,12 +834,12 @@ GameScene.update=function(t) {
     if (jimOpen) {
         document.getElementById("money").innerHTML=`$${coins}`;
         document.getElementById("jimItemDesc").innerHTML="Hover over an item to show its description";
-        document.querySelectorAll(".jimItem").forEach(i=>{
+        document.querySelectorAll(".jimItemContainer").forEach(i=>{
             i.style["filter"]="";
-            shopItems[i.id.split("_")[1]].requires?.map(requiredItem=>boughtShopItems.includes(requiredItem)).forEach(a=>a==0?i.style["filter"]="brightness(50%)":"");
+            shopItems[i.id.split("_")[1]].requires?.map(requiredItem=>boughtShopItems.includes(requiredItem)).forEach(a=>!a?i.style["filter"]="brightness(50%)":"");
             if (boughtShopItems.includes(i.id.split("_")[1])) i.remove();
         });
-        document.querySelectorAll(".jimItem:hover").forEach(i=>{
+        document.querySelectorAll(".jimItemContainer:hover").forEach(i=>{
             temp2=shopItems[i.id.split("_")[1]]?.requires?.map(r=>shopItems[r].name);
             temp=temp2?.length>1?temp2.join(", "):temp2?.[0]||"None";
             document.getElementById("jimItemDesc").innerHTML=`<strong>${shopItems[i.id.split("_")[1]].name} (${shopItems[i.id.split("_")[1]].cost})</strong><br>${shopItems[i.id.split("_")[1]].description}<br>Requires: ${temp}`;
@@ -1317,7 +1317,14 @@ function tryOpenJim() {
         let item=shopItems[i];
         temp2=document.createElement("img");
         temp2.src=assetIndex.filter(a=>a.id==item.spriteKey)[0].url;
-        temp2.addEventListener("mousedown", (e)=>{
+        temp2.className="jimItem";
+        temp2.id=`shopItem_${i}`;
+        temp2.style["min-height"]="56px";
+        let el=document.createElement("div");
+        el.className="jimItemContainer";
+        el.id=`shopItemContainer_${i}`;
+        el.appendChild(temp2);
+        el.addEventListener("mousedown", (e)=>{
             temp=e.target.id.split("_")[1];
             if (shopItems[temp].cost<=coins&&!shopItems[temp].requires?.filter(r=>!boughtShopItems.includes(r)).length) {
                 if (temp=="devil") {
@@ -1334,12 +1341,6 @@ function tryOpenJim() {
                 };
             };
         });
-        temp2.className="jimItem";
-        temp2.id=`shopItem_${i}`;
-        temp2.style["min-height"]="56px";
-        let el=document.createElement("td");
-        el.className="jimItemContainer";
-        el.appendChild(temp2);
         temp.node.appendChild(el);
     });
     temp=scene.add.dom(scene.game.canvas.width/2, scene.game.canvas.height-64, "div", "width: 100%; background-color: black; border: 1px solid green; height: 256px; font-family: monospace;", "");
