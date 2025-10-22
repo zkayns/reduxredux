@@ -1317,12 +1317,6 @@ function tryOpenJim() {
         let item=shopItems[i];
         temp2=document.createElement("img");
         temp2.src=assetIndex.filter(a=>a.id==item.spriteKey)[0].url;
-        temp2.style["height"]="48px";
-        temp2.style["padding"]="6px";
-        if (i=="extraLife") {
-            temp2.style["padding-left"]="10.5px";
-            temp2.style["padding-right"]="10.5px";
-        };
         temp2.addEventListener("mousedown", (e)=>{
             temp=e.target.id.split("_")[1];
             if (shopItems[temp].cost<=coins&&!shopItems[temp].requires?.filter(r=>!boughtShopItems.includes(r)).length) {
@@ -1342,7 +1336,11 @@ function tryOpenJim() {
         });
         temp2.className="jimItem";
         temp2.id=`shopItem_${i}`;
-        temp.node.appendChild(temp2);
+        temp2.style["min-height"]="56px";
+        let el=document.createElement("td");
+        el.className="jimItemContainer";
+        el.appendChild(temp2);
+        temp.node.appendChild(el);
     });
     temp=scene.add.dom(scene.game.canvas.width/2, scene.game.canvas.height-64, "div", "width: 100%; background-color: black; border: 1px solid green; height: 256px; font-family: monospace;", "");
     temp.depth=999999;
@@ -1529,7 +1527,7 @@ function takeScreenshot() {
 };
 function alignJim() { // "but it works bro"
     [...document.querySelector("#daJim").querySelectorAll("br")].forEach(el=>el?.remove());
-    [...document.querySelectorAll(".jimItem")].forEach(el=>([...document.querySelectorAll(".jimItem")].indexOf(el)+1)%6==0?el.after(document.createElement("br")):"");
+    [...document.querySelectorAll(".jimItemContainer")].forEach(el=>([...document.querySelectorAll(".jimItemContainer")].indexOf(el)+1)%6==0?el.after(document.createElement("br")):"");
 };
 function createMustardProjectile() {
     enemyData.projectileTimer=0;
