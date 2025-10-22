@@ -141,6 +141,11 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/hyperCharmUp.png"
     },
     {
+        name: "Devil Up Charm",
+        id: "devilCharmUp",
+        url: "https://zkayns.github.io/reduxredux/assets/devilCharmUp.png"
+    },
+    {
         name: "Hyper Charm L",
         id: "hyperCharmL",
         url: "https://zkayns.github.io/reduxredux/assets/hyperCharmL.png"
@@ -149,6 +154,16 @@ let assetIndex=[
         name: "Hyper Charm R",
         id: "hyperCharmR",
         url: "https://zkayns.github.io/reduxredux/assets/hyperCharmR.png"
+    },
+    {
+        name: "Devil Charm L",
+        id: "devilCharmL",
+        url: "https://zkayns.github.io/reduxredux/assets/devilCharmL.png"
+    },
+    {
+        name: "Devil Charm R",
+        id: "devilCharmR",
+        url: "https://zkayns.github.io/reduxredux/assets/devilCharmR.png"
     },
     {
         name: "Shield L",
@@ -184,6 +199,16 @@ let assetIndex=[
         name: "Hyper Shockwave R",
         id: "hyperShockwaveR",
         url: "https://zkayns.github.io/reduxredux/assets/hyperShockwaveR.png"
+    },
+    {
+        name: "Devil Shockwave L",
+        id: "devilShockwaveL",
+        url: "https://zkayns.github.io/reduxredux/assets/devilShockwaveL.png"
+    },
+    {
+        name: "Devil Shockwave R",
+        id: "devilShockwaveR",
+        url: "https://zkayns.github.io/reduxredux/assets/devilShockwaveR.png"
     },
     {
         name: "Robo Shockwave L",
@@ -573,6 +598,10 @@ let hitEffect;
 let playerHitEffect;
 let devilCreated=false;
 let beatenEnemies=new Array();
+let charmType="";
+let upCharmType="";
+let shockwaveType="";
+let charismaType="";
 let MainMenuScene={
     key: "MainMenuScene",
     physics: physics,
@@ -809,7 +838,7 @@ GameScene.update=function(t) {
         player.rotation+=1;
         enemy.rotation+=currentFight=="snowy";
     };
-    scene.children.list.filter(obj=>keyTagged(obj, "charm")||keyTagged(obj, "hyperCharm")).forEach(charm=>{
+    scene.children.list.filter(obj=>keyTagged(obj, "charm")||keyTagged(obj, "hyperCharm")||keyTagged(obj, "devilCharm")).forEach(charm=>{
         scene.physics.overlap(charm, enemy, ()=>{
             charm?.destroy();
             enemyHit(t);
@@ -824,7 +853,7 @@ GameScene.update=function(t) {
         });
         charisma?.body?.left>scene.game.canvas.width||charisma?.body?.right<0?charisma?.destroy():"";
     });
-    scene.children.list.filter(obj=>keyTagged(obj, "shockwave")||keyTagged(obj, "hyperShockwave")).forEach(shockwave=>{
+    scene.children.list.filter(obj=>keyTagged(obj, "shockwave")||keyTagged(obj, "hyperShockwave")||keyTagged(obj, "devilShockwave")).forEach(shockwave=>{
         scene.physics.overlap(shockwave, enemy, ()=>{
             shockwave?.destroy();
             enemyHit(t);
@@ -893,7 +922,7 @@ GameScene.update=function(t) {
     });
     if (slamming&&player.body.blocked.down) {
         slamming=false;
-        temp=scene.physics.add.sprite(player.x, player.y, `${boughtShopItems.includes("hyperSlam")?"hyperS":"s"}hockwaveL`);
+        temp=scene.physics.add.sprite(player.x, player.y, `${getType("shockwave")}L`);
         temp.scaleX=1.5;
         temp.scaleY=1.5;
         temp.body.velocity.x=-400*(boughtShopItems.includes("hyperSlam")+1);
@@ -901,7 +930,7 @@ GameScene.update=function(t) {
         temp.body.allowGravity=false;
         temp.y=ground.body.top-temp.body.height/1.333;
         scene.physics.add.collider(ground, temp);
-        temp=scene.physics.add.sprite(player.x, player.y, `${boughtShopItems.includes("hyperSlam")?"hyperS":"s"}hockwaveR`);
+        temp=scene.physics.add.sprite(player.x, player.y, `${getType("shockwave")}R`);
         temp.scaleX=1.5;
         temp.scaleY=1.5;
         temp.body.velocity.x=400*(boughtShopItems.includes("hyperSlam")+1);
@@ -1152,7 +1181,7 @@ function tryJump() {
 };
 function tryCharm() {
     if (sinceLastCharm<charmCooldown) return false;
-    temp=scene.physics.add.sprite(player.x+player.body.width/2*Math.sign(lastDirection-.5), player.y, `${boughtShopItems.includes("hyperCharm")?"hyperC":"c"}harm${lastDirection?"R":"L"}`);
+    temp=scene.physics.add.sprite(player.x+player.body.width/2*Math.sign(lastDirection-.5), player.y, `${getType("charm")}${lastDirection?"R":"L"}`);
     temp.body.width*=1.5;
     temp.body.height*=1.5;
     temp.scaleX=1.5;
@@ -1162,7 +1191,7 @@ function tryCharm() {
     temp.body.drag=1;
     sinceLastCharm=0;
     if (currentFight=="snowy"&&enemyHp>0) {
-        temp=scene.physics.add.sprite(enemy.x+enemy.body.width/2*Math.sign(!lastDirection-.5), player.y, `${boughtShopItems.includes("hyperCharm")?"hyperC":"c"}harisma${lastDirection?"L":"R"}`);
+        temp=scene.physics.add.sprite(enemy.x+enemy.body.width/2*Math.sign(!lastDirection-.5), player.y, `${getType("charisma")}${lastDirection?"L":"R"}`);
         temp.body.width*=1.5;
         temp.body.height*=1.5;
         temp.scaleX=1.5;
@@ -1174,7 +1203,7 @@ function tryCharm() {
 };
 function tryCharmUp() {
     if (!boughtShopItems.includes("upCharm")||sinceLastUpCharm<upCharmCooldown) return false;
-    temp=scene.physics.add.sprite(player.x, player.y, `${boughtShopItems.includes("hyperUpCharm")?"hyperC":"c"}harmUp`);
+    temp=scene.physics.add.sprite(player.x, player.y, `${getType("upCharm")}`);
     temp.body.width*=1.5;
     temp.body.height*=1.5;
     temp.scaleX=1.5;
@@ -1505,4 +1534,23 @@ function shouldDespawn(o) {
         keyTagged(o, "slam"),
         keyTagged(o, "hyperShockwave")
     ].filter(i=>!!i).length;
+};
+function getType(thing) {
+    switch (thing) {
+        case "charm":
+            if (boughtShopItems.includes("devil")) return "devilCharm";
+            if (boughtShopItems.includes("hyperCharm")) return "hyperCharm";
+            return "charm";
+        case "upCharm":
+            if (boughtShopItems.includes("devil")) return "devilCharmUp";
+            if (boughtShopitems.includes("hyperUpCharm")) return "hyperCharmUp";
+            return "charmUp";
+        case "shockwave":
+            if (boughtShopItems.includes("devil")) return "devilShockwave";
+            if (boughtShopitems.includes("hyperSlam")) return "hyperShockwave";
+            return "shockwave";
+        case "charisma":
+            if (boughtShopItems.includes("hyperCharm")) return "hyperCharisma";
+            return "charisma";
+    };
 };
