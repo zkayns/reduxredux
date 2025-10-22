@@ -101,6 +101,11 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/hyperSlamBook.png"
     },
     {
+        name: "Devil Book",
+        id: "devilBook",
+        url: "https://zkayns.github.io/reduxredux/assets/devilBook.png"
+    },
+    {
         name: "Onion Coin",
         id: "onionCoin",
         url: "https://zkayns.github.io/reduxredux/assets/onionCoin.png"
@@ -161,24 +166,24 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/hyperShield.png"
     },
     {
-        name: "Slam L",
-        id: "slamL",
-        url: "https://zkayns.github.io/reduxredux/assets/slamL.png"
+        name: "Shockwave L",
+        id: "shockwaveL",
+        url: "https://zkayns.github.io/reduxredux/assets/shockwaveL.png"
     },
     {
-        name: "Slam R",
-        id: "slamR",
-        url: "https://zkayns.github.io/reduxredux/assets/slamR.png"
+        name: "Shockwave R",
+        id: "shockwaveR",
+        url: "https://zkayns.github.io/reduxredux/assets/shockwaveR.png"
     },
     {
-        name: "Hyper Slam L",
-        id: "hyperSlamL",
-        url: "https://zkayns.github.io/reduxredux/assets/hyperSlamL.png"
+        name: "Hyper Shockwave L",
+        id: "hyperShockwaveL",
+        url: "https://zkayns.github.io/reduxredux/assets/hyperShockwaveL.png"
     },
     {
-        name: "Hyper Slam R",
-        id: "hyperSlamR",
-        url: "https://zkayns.github.io/reduxredux/assets/hyperSlamR.png"
+        name: "Hyper Shockwave R",
+        id: "hyperShockwaveR",
+        url: "https://zkayns.github.io/reduxredux/assets/hyperShockwaveR.png"
     },
     {
         name: "Robo Shockwave L",
@@ -469,6 +474,16 @@ let assetIndex=[
         name: "Mustard Projectile",
         id: "mustardProjectile",
         url: "https://zkayns.github.io/reduxredux/assets/mustardProjectile.png"
+    },
+    {
+        name: "Devil L",
+        id: "devilL",
+        url: "https://zkayns.github.io/reduxredux/assets/devilL.png"
+    },
+    {
+        name: "Devil R",
+        id: "devilR",
+        url: "https://zkayns.github.io/reduxredux/assets/devilR.png"
     }
 ];
 let T=0;
@@ -556,6 +571,7 @@ let lastPlayerHit=0;
 let onionLocation="town";
 let hitEffect;
 let playerHitEffect;
+let devilCreated=false;
 let beatenEnemies=new Array();
 let MainMenuScene={
     key: "MainMenuScene",
@@ -660,6 +676,13 @@ let shopItems={
         spriteKey: "doubleJumpBook",
         description: "Allows you to double jump",
         cost: 2
+    },
+    devil: {
+        name: "Lil Devil",
+        spriteKey: "devilBook",
+        description: "Makes you and your attacks faster at the cost of 3 HP cap",
+        cost: 3,
+        requires: ["hyperSlam", "hyperCharm"]
     }
 }
 let config={
@@ -756,11 +779,17 @@ GameScene.update=function(t) {
     T=t;
     playerTouchingBoard=false;
     if (hp<=0) die();
+    if (boughtShopItems.includes("devil")&&!devilCreated) {
+        devilCreated=true;
+        temp=scene.physics.add.sprite(player.x, player.y, "devilR");
+        temp.body.allowGravity=false;
+    };
     if (jimOpen) {
         document.getElementById("money").innerHTML=`$${coins}`;
         document.getElementById("jimItemDesc").innerHTML="Hover over an item to show its description";
         document.querySelectorAll(".jimItem").forEach(i=>{
-            shopItems[i.id.split("_")[1]].requires?.forEach(requiredItem=>i.style["filter"]=boughtShopItems.includes(requiredItem)?"":"brightness(50%)");
+            i.style["filter"]="";
+            shopItems[i.id.split("_")[1]].requires?.map(requiredItem=>boughtShopItems.includes(requiredItem)).forEach(a=>a==0?i.style["filter"]="brightness(50%)":"");
             if (boughtShopItems.includes(i.id.split("_")[1])) i.remove();
         });
         document.querySelectorAll(".jimItem:hover").forEach(i=>{
@@ -795,12 +824,12 @@ GameScene.update=function(t) {
         });
         charisma?.body?.left>scene.game.canvas.width||charisma?.body?.right<0?charisma?.destroy():"";
     });
-    scene.children.list.filter(obj=>keyTagged(obj, "slam")||keyTagged(obj, "hyperSlam")).forEach(slam=>{
-        scene.physics.overlap(slam, enemy, ()=>{
-            slam?.destroy();
+    scene.children.list.filter(obj=>keyTagged(obj, "shockwave")||keyTagged(obj, "hyperShockwave")).forEach(shockwave=>{
+        scene.physics.overlap(shockwave, enemy, ()=>{
+            shockwave?.destroy();
             enemyHit(t);
         });
-        slam?.body?.left>scene.game.canvas.width||slam?.body?.right<0?slam?.destroy():"";
+        shockwave?.body?.left>scene.game.canvas.width||shockwave?.body?.right<0?shockwave?.destroy():"";
     });
     scene.children.list.filter(obj=>keyTagged(obj, "roboShockwave")).forEach(roboShockwave=>{
         scene.physics.overlap(roboShockwave, player, ()=>{
@@ -842,6 +871,10 @@ GameScene.update=function(t) {
         };
         if (mustard.scale<=0) mustard?.destroy();
     });
+    scene.children.list.filter(obj=>keyTagged(obj, "devil")).forEach(devil=>{
+        devil.x=player.getTopLeft().x;
+        devil.y=player.getTopLeft().y;
+    });
     canMove=!(jimOpen+transitioningIntoFight+boardOpen+dead);
     player.setVelocityX((-bindIsDown(controls.player.moveLeft)*playerSpeed+bindIsDown(controls.player.moveRight)*playerSpeed)*canMove);
     onionState=`${((bindIsDown(controls.player.moveLeft)||bindIsDown(controls.player.moveRight))*canMove)?"Walk":"Idle"}${lastDirection?"R":"L"}`;
@@ -860,7 +893,7 @@ GameScene.update=function(t) {
     });
     if (slamming&&player.body.blocked.down) {
         slamming=false;
-        temp=scene.physics.add.sprite(player.x, player.y, `${boughtShopItems.includes("hyperSlam")?"hyperS":"s"}lamL`);
+        temp=scene.physics.add.sprite(player.x, player.y, `${boughtShopItems.includes("hyperSlam")?"hyperS":"s"}hockwaveL`);
         temp.scaleX=1.5;
         temp.scaleY=1.5;
         temp.body.velocity.x=-400*(boughtShopItems.includes("hyperSlam")+1);
@@ -868,7 +901,7 @@ GameScene.update=function(t) {
         temp.body.allowGravity=false;
         temp.y=ground.body.top-temp.body.height/1.333;
         scene.physics.add.collider(ground, temp);
-        temp=scene.physics.add.sprite(player.x, player.y, `${boughtShopItems.includes("hyperSlam")?"hyperS":"s"}lamR`);
+        temp=scene.physics.add.sprite(player.x, player.y, `${boughtShopItems.includes("hyperSlam")?"hyperS":"s"}hockwaveR`);
         temp.scaleX=1.5;
         temp.scaleY=1.5;
         temp.body.velocity.x=400*(boughtShopItems.includes("hyperSlam")+1);
@@ -1470,6 +1503,6 @@ function shouldDespawn(o) {
         keyTagged(o, "charisma"),
         keyTagged(o, "hyperCharisma"),
         keyTagged(o, "slam"),
-        keyTagged(o, "hyperSlam")
+        keyTagged(o, "hyperShockwave")
     ].filter(i=>!!i).length;
 };
