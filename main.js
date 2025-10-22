@@ -666,6 +666,13 @@ let shopItems={
         description: "Allows you to press Z for a shield",
         cost: 1
     },
+    hyperShield: {
+        name: "Hyper Shield",
+        spriteKey: "hyperShieldBook",
+        description: "Makes your shield really big (and orange)",
+        cost: 2,
+        requires: ["shield"]
+    },
     upCharm: {
         name: "Up Charm",
         spriteKey: "upCharmBook",
@@ -678,13 +685,6 @@ let shopItems={
         description: "Makes your up charms really fast (and green)",
         cost: 1,
         requires: ["upCharm"]
-    },
-    hyperShield: {
-        name: "Hyper Shield",
-        spriteKey: "hyperShieldBook",
-        description: "Makes your shield really big (and orange)",
-        cost: 2,
-        requires: ["shield"]
     },
     hyperCharm: {
         name: "Hyper Charm",
