@@ -1160,7 +1160,7 @@ GameScene.update=function(t) {
                             enemy.rotation=Phaser.Math.Angle.BetweenPoints(enemy, player)+Math.PI/2;
                             enemy.body.velocity.x=500*Math.cos(enemy.rotation-Math.PI/2);
                             enemy.body.velocity.y=500*Math.sin(enemy.rotation-Math.PI/2);
-                            enemyData=structuredClone({
+                            enemyData={
                                 dist: Phaser.Math.Distance.BetweenPoints(player, enemy),
                                 dashPos: {
                                     x: enemy.x,
@@ -1168,7 +1168,7 @@ GameScene.update=function(t) {
                                 },
                                 lastDashAt: t,
                                 projectileTimer: 0
-                            });
+                            };
                             enemyState=1;
                             createMustardProjectile();
                         };
@@ -1208,7 +1208,7 @@ function startCredits() {
     temp.innerHTML+="<p>Original game series by PiranaJoe</p>";
     temp.innerHTML+="<p>Based off of a series of comics by Asher</p>";
     temp.innerHTML+="<p>Music by zkayns</p>";
-    temp.innerHTML+="<p>Sprites by PiranaJoe and Vortex</p>";
+    temp.innerHTML+="<p>Sprites by PiranaJoe, Vortex, and zkayns</p>";
     temp.innerHTML+="<p>Made with the Phaser JavaScript game framework</p>";
     document.getElementById("credits").appendChild(temp);
     temp=scene.add.dom(scene.game.canvas.width, 0, "button", "", "X");
