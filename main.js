@@ -66,6 +66,21 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/extraLife.png"
     },
     {
+        name: "Shoes",
+        id: "shoes",
+        url: "https://zkayns.github.io/reduxredux/assets/shoes.png"
+    },
+    {
+        name: "Soder",
+        id: "soder",
+        url: "https://zkayns.github.io/reduxredux/assets/soder.png"
+    },
+    {
+        name: "Inr-G",
+        id: "inrg",
+        url: "https://zkayns.github.io/reduxredux/assets/inrg.png"
+    },
+    {
         name: "Shield Book",
         id: "shieldBook",
         url: "https://zkayns.github.io/reduxredux/assets/shieldBook.png"
@@ -169,6 +184,16 @@ let assetIndex=[
         name: "Devil Charm R",
         id: "devilCharmR",
         url: "https://zkayns.github.io/reduxredux/assets/devilCharmR.png"
+    },
+    {
+        name: "Devil Nut L",
+        id: "devilNutL",
+        url: "https://zkayns.github.io/reduxredux/assets/devilNutL.png"
+    },
+    {
+        name: "Devil Nut R",
+        id: "devilNutR",
+        url: "https://zkayns.github.io/reduxredux/assets/devilNutR.png"
     },
     {
         name: "Shield L",
@@ -672,6 +697,24 @@ let shopItems={
         cost: 1,
         rebuyable: true
     },
+    shoes: {
+        name: "Shoes",
+        spriteKey: "shoes",
+        description: "Makes you go faster",
+        cost: 1,
+    },
+    soder: {
+        name: "Soder",
+        spriteKey: "soder",
+        description: "Makes your shield last half a second longer",
+        cost: 2,
+    },
+    inrg: {
+        name: "Inr-G",
+        spriteKey: "inrg",
+        description: "Makes your shield cooldown half a second shorter",
+        cost: 2,
+    },
     shield: {
         name: "Shield",
         spriteKey: "shieldBook",
@@ -726,7 +769,7 @@ let shopItems={
     devil: {
         name: "Lil Devil",
         spriteKey: "devilBook",
-        description: "Makes you and your attacks faster at the cost of 3 HP cap",
+        description: "Makes your attacks faster and adds devil nuts at the cost of 3 HP cap",
         cost: 3,
         requires: ["hyperSlam", "hyperCharm", "hyperShield"]
     }
@@ -833,7 +876,7 @@ GameScene.update=function(t) {
     };
     if (jimOpen) {
         document.getElementById("money").innerHTML=`$${coins}`;
-        document.getElementById("jimItemDesc").innerHTML="Hover over an item to show its description";
+        document.getElementById("jimItemDesc").innerHTML="Sup, BO.<br>Hover over an item and I'll tell ya what it does.";
         document.querySelectorAll(".jimItemContainer").forEach(i=>{
             i.style["filter"]="";
             shopItems[i.id.split("_")[1]].requires?.map(requiredItem=>boughtShopItems.includes(requiredItem)).forEach(a=>!a?i.style["filter"]="brightness(50%)":"");
@@ -924,7 +967,7 @@ GameScene.update=function(t) {
         devil.setTexture(`devil${lastDirection?"R":"L"}`);
     });
     canMove=!(jimOpen+transitioningIntoFight+boardOpen+dead);
-    player.setVelocityX((-bindIsDown(controls.player.moveLeft)*playerSpeed+bindIsDown(controls.player.moveRight)*playerSpeed)*canMove);
+    player.setVelocityX((-bindIsDown(controls.player.moveLeft)*(playerSpeed+boughtShopItems.includes("shoes")*60)+bindIsDown(controls.player.moveRight)*(playerSpeed+boughtShopItems.includes("shoes")*60))*canMove);
     onionState=`${((bindIsDown(controls.player.moveLeft)||bindIsDown(controls.player.moveRight))*canMove)?"Walk":"Idle"}${lastDirection?"R":"L"}`;
     if (onionState.slice(0,4)=="Idle") {
         if (gameFrame%30==0) onionFrame++;
@@ -1230,6 +1273,18 @@ function tryCharmUp() {
     temp.body.allowGravity=false;
     temp.setVelocityY(-260*(boughtShopItems.includes("hyperUpCharm")+boughtShopItems.includes("devil")+1));
     temp.body.drag=1;
+    if (getType("upCharm")=="devilCharmUp") {
+        temp=scene.physics.add.sprite(player.x, player.y, "devilNutL");
+        temp.body.allowGravity=false;
+        temp.setVelocityX(-260);
+        temp.setVelocityY(-780);
+        temp.body.drag=1;
+        temp=scene.physics.add.sprite(player.x, player.y, "devilNutR");
+        temp.body.allowGravity=false;
+        temp.setVelocityX(260);
+        temp.setVelocityY(-780);
+        temp.body.drag=1;
+    };
     sinceLastUpCharm=0;
 };
 function tryShield() {
@@ -1320,7 +1375,6 @@ function tryOpenJim() {
         temp2.src=assetIndex.filter(a=>a.id==item.spriteKey)[0].url;
         temp2.className="jimItem";
         temp2.id=`shopItem_${i}`;
-        temp2.style["min-height"]="56px";
         let el=document.createElement("div");
         el.className="jimItemContainer";
         el.id=`shopItemContainer_${i}`;
@@ -1328,12 +1382,19 @@ function tryOpenJim() {
         el.addEventListener("mousedown", (e)=>{
             temp=e.target.id.split("_")[1];
             if (shopItems[temp].cost<=coins&&!shopItems[temp].requires?.filter(r=>!boughtShopItems.includes(r)).length) {
-                if (temp=="devil") {
-                    fights["snowy"].hp-=3;
-                    maxHp-=3;
-                };
-                if (temp=="extraLife") {
-                    hp=Math.min(hp+3, maxHp);
+                switch (temp) {
+                    case "devil":
+                        fights["snowy"].hp-=3;
+                        maxHp-=3;
+                        break;
+                    case "extraLife":
+                        hp=Math.min(hp+3, maxHp);
+                        break;
+                    case "inrg":
+                        shieldCooldown-=500;  
+                    case "soder":
+                        shieldDuration+=500;
+                        break;
                 };
                 coins-=shopItems[temp].cost;
                 if (!shopItems[temp]?.rebuyable) {
@@ -1566,14 +1627,14 @@ function shouldDespawn(o) {
     ].filter(i=>!!i).length;
 };
 function isCharm(o) {
-    return keyTagged(o, "charm")||keyTagged(o, "hyperCharm")||keyTagged(o, "devilCharm");
+    return keyTagged(o, "charm")||keyTagged(o, "hyperCharm")||keyTagged(o, "devilCharm")||keyTagged(o, "devilNut");
 };
 function isShield(o) {
     return keyTagged(o, "shield")||keyTagged(o, "hyperShield")||keyTagged(o, "devilShield");
 };
 function isPlayerShockwave(o) {
     return keyTagged(o, "shockwave")||keyTagged(o, "hyperShockwave")||keyTagged(o, "devilShockwave");
-}
+};
 function getType(thing) {
     switch (thing) {
         case "charm":
