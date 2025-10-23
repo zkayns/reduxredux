@@ -66,6 +66,11 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/extraLife.png"
     },
     {
+        name: "Cap Life",
+        id: "capLife",
+        url: "https://zkayns.github.io/reduxredux/assets/capLife.png"
+    },
+    {
         name: "Shoes",
         id: "shoes",
         url: "https://zkayns.github.io/reduxredux/assets/shoes.png"
@@ -697,6 +702,13 @@ let shopItems={
         cost: 1,
         rebuyable: true
     },
+    capLife: {
+        name: "Cap Life",
+        spriteKey: "capLife",
+        description: "Makes you not die by adding 1 to your HP cap. Caps at 15",
+        cost: 2,
+        rebuyable: true
+    },
     shoes: {
         name: "Shoes",
         spriteKey: "shoes",
@@ -878,8 +890,10 @@ GameScene.update=function(t) {
         document.getElementById("money").innerHTML=`$${coins}`;
         document.getElementById("jimItemDesc").innerHTML="Sup, BO.<br>Hover over an item and I'll tell ya what it does.";
         document.querySelectorAll(".jimItemContainer").forEach(i=>{
-            i.style["filter"]="";
+            i.style["filter"]=shopItems[i.id.split("_")[1]]?.unbuyable?"brightness(50%)":"";
             shopItems[i.id.split("_")[1]].requires?.map(requiredItem=>boughtShopItems.includes(requiredItem)).forEach(a=>!a?i.style["filter"]="brightness(50%)":"");
+            if (hp>=maxHp&&i.id.split("_")[1]=="extraLife") shopItems["extraLife"].unbuyable=true;
+            if (maxHp>=15&&i.id.split("_")[1]=="capLife") shopItems["capLife"].unbuyable=true;
             if (boughtShopItems.includes(i.id.split("_")[1])) i.remove();
         });
         document.querySelectorAll(".jimItemContainer:hover").forEach(i=>{
@@ -1381,14 +1395,17 @@ function tryOpenJim() {
         el.appendChild(temp2);
         el.addEventListener("mousedown", (e)=>{
             temp=e.target.id.split("_")[1];
-            if (shopItems[temp].cost<=coins&&!shopItems[temp].requires?.filter(r=>!boughtShopItems.includes(r)).length) {
+            if (shopItems[temp].cost<=coins&&!shopItems[temp].requires?.filter(r=>!boughtShopItems.includes(r)).length&&!shopItems[temp]?.unbuyable) {
                 switch (temp) {
                     case "devil":
-                        fights["snowy"].hp-=3;
                         maxHp-=3;
                         break;
                     case "extraLife":
                         hp=Math.min(hp+3, maxHp);
+                        break;
+                    case "capLife":
+                        maxHp=Math.min(maxHp+1, 15);
+                        hp=Math.min(hp+1, maxHp);
                         break;
                     case "inrg":
                         shieldCooldown-=500;  
@@ -1450,6 +1467,7 @@ function goToFight(fight) {
             enemy.y=ground.body.top-enemy.body.height-6;
             break;
         case "snowy":
+            fights["snowy"].hp=hp;
             enemy.displayHeight=scene.textures.get("snowyIdleL1").getSourceImage().height*2;
             enemy.displayWidth=scene.textures.get("snowyIdleL1").getSourceImage().width*2;
             enemy.body.setSize(scene.textures.get(enemy.texture.key).getSourceImage().width, scene.textures.get(enemy.texture.key).getSourceImage().height);
