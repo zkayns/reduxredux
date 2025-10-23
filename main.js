@@ -61,6 +61,11 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/pineappleWhoManagesDaJim.png"
     },
     {
+        name: "Exit Sign",
+        id: "exitSign",
+        url: "https://zkayns.github.io/reduxredux/assets/exitSign.png"
+    },
+    {
         name: "Extra Life",
         id: "extraLife",
         url: "https://zkayns.github.io/reduxredux/assets/extraLife.png"
@@ -757,7 +762,7 @@ let shopItems={
         name: "Hyper Charm",
         spriteKey: "hyperCharmBook",
         description: "Makes your charms really fast (and blue)",
-        cost: 2
+        cost: 1
     },
     slam: {
         name: "Slam",
@@ -1369,6 +1374,7 @@ function tryOpenJim() {
         document.getElementById("jimTextbox")?.remove();
         document.getElementById("pineappleWhoManagesDaJim")?.remove();
         document.getElementById("money")?.remove();
+        document.getElementById("exitSign")?.remove();
         music=scene.sound.add("townBgm").setLoop(true);
         music.play();
         jimOpen=false;
@@ -1437,6 +1443,11 @@ function tryOpenJim() {
     temp=scene.add.dom(10, 280, "strong", "", "$0");
     temp.node.id="money";
     temp.node.style["text-align"]="center";
+    temp=scene.add.dom(606, 4, "img", "", "");
+    temp.node.src=assetIndex.filter(a=>a.id=="exitSign")[0].url;
+    temp.node.id="exitSign";
+    temp.depth=1000000;
+    document.getElementById("exitSign").addEventListener("mousedown", tryOpenJim);
 };
 function goToFight(fight) {
     if (beatenEnemies.includes(fight)) return false;
