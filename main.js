@@ -22,7 +22,7 @@ let assetIndex=[
         name: "Mustard BGM",
         audio: true,
         id: "mustardBgm",
-        url: "https://zkayns.github.io/reduxredux/assets/SnowyC.mp3"
+        url: "https://zkayns.github.io/reduxredux/assets/Musturd Music.mp3"
     },
     {
         name: "Da Jim BGM",
@@ -921,6 +921,7 @@ GameScene.update=function(t) {
     scene.children.list.filter(obj=>keyTagged(obj, "devil", 6)).forEach(devil=>{
         devil.x=lastDirection?player.getTopLeft().x:player.getTopRight().x;
         devil.y=player.getTopLeft().y;
+        devil.setTexture(`devil${lastDirection?"R":"L"}`);
     });
     canMove=!(jimOpen+transitioningIntoFight+boardOpen+dead);
     player.setVelocityX((-bindIsDown(controls.player.moveLeft)*playerSpeed+bindIsDown(controls.player.moveRight)*playerSpeed)*canMove);
