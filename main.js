@@ -554,6 +554,21 @@ let assetIndex=[
         name: "Devil R",
         id: "devilR",
         url: "https://zkayns.github.io/reduxredux/assets/devilR.png"
+    },
+    {
+        name: "Woozrd",
+        id: "woozrd",
+        url: "https://zkayns.github.io/reduxredux/assets/woozrd.png"
+    },
+    {
+        name: "Magic Ball",
+        id: "magicBall",
+        url: "https://zkayns.github.io/reduxredux/assets/magicBall.png"
+    },
+    {
+        name: "Flash",
+        id: "flash",
+        url: "https://zkayns.github.io/reduxredux/assets/flash.png"
     }
 ];
 let T=0;
@@ -679,6 +694,15 @@ let fights={
         startX: 512,
         startY: 344,
         startSpriteKey: "mustard1",
+        musicKey: "mustardBgm"
+    },
+    woozrd: {
+        name: "Woozrd",
+        spriteTag: "woozrd",
+        hp: 10,
+        startX: 320,
+        startY: 240,
+        startSpriteKey: "woozrd",
         musicKey: "mustardBgm"
     }
 };
@@ -978,6 +1002,14 @@ GameScene.update=function(t) {
         if (mustard.scale<=0) mustard.destroy();
         scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{scene.physics.overlap(mustard, shield, ()=>{mustard.destroy()})});
     });
+    scene.children.list.filter(obj=>keyTagged(obj, "magicBall")).forEach(magicBall=>{
+        if (Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), magicBall.getBounds())) {
+            playerHit();
+            magicBall.destroy();
+        };
+        scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{scene.physics.overlap(magicBall, shield, ()=>{magicBall.destroy()})});
+        magicBall?.body?.left>scene.game.canvas.width||magicBall?.body?.right<0?magicBall.destroy():"";
+    });
     scene.children.list.filter(obj=>keyTagged(obj, "devil", 6)).forEach(devil=>{
         devil.x=lastDirection?player.getTopLeft().x:player.getTopRight().x;
         devil.y=player.getTopLeft().y;
@@ -1041,6 +1073,7 @@ GameScene.update=function(t) {
                 document.getElementById("enemyHealthBar").innerHTML=`[${"|".repeat(enemyHp)}<span style='color: black'>${"|".repeat(fights[currentFight].hp-enemyHp)}</span>]`;
                 document.getElementById("onionHealthBar").innerHTML=`[${"|".repeat(hp)}<span style='color: black'>${"|".repeat(maxHp-hp)}</span>]`;
             };
+            if (currentFight=="woozrd"&&enemyData?.fadingIn&&transitioningIntoFight) enemy.alpha+=.03;
             if (hitEffect&&t-lastHit>200) enemy.postFX.remove(hitEffect);
             if (!transitioningIntoFight) { // IF CURRENTLY IN FIGHT
                 enemyActTimer+=t-lastT;
@@ -1179,6 +1212,41 @@ GameScene.update=function(t) {
                             enemyState=0;
                         };
                         break;
+                    case "woozrd": // WOOZRD FIGHT
+                        if (enemyData.fadingIn) enemy.alpha+=.05;
+                        if (enemyHp<=0&&enemyDead==false) { // ON DEATH
+                            enemyActTimer=0;
+                            enemyDead=true;
+                        };
+                        if (enemyDead&&enemyActTimer<1500) { // AFTER DEATH, BEFORE FLASH
+                            enemy.rotation-=1;
+                            enemy.scale=Math.max(enemy.scale-.02, 0);
+                        } else if (enemyDead&&enemyActTimer>=1500&&!enemyData?.hasFlashed) { // ON FLASH
+                            temp=scene.add.sprite(enemy.x, enemy.y, "flash");
+                            temp.scale=2;
+                            enemyData.hasFlashed=true;
+                            enemy.alpha=0;
+                        } else if (enemyData?.hasFlashed&&enemyDead) { // AFTER FLASH
+                            scene.children.list.filter(obj=>keyTagged(obj, "flash")).forEach(flash=>flash.alpha-=.02);
+                        };
+                        if (enemyActTimer>=1500&&enemyHp>0) { // ON TELEPORT
+                            enemy.alpha=0;
+                            enemyData.fadingIn=true;
+                            scene.time.delayedCall(333, ()=>{
+                                enemyData.fadingIn=false;
+                                enemy.alpha=1;
+                            });
+                            enemyActTimer=0;
+                            enemy.x=Math.max(0, Math.min(player.x+Math.random()*300*Math.sign(Math.random()-.5), 600));
+                            enemy.y=ground.body.top-Math.random()*300;
+                            enemy.rotation=Phaser.Math.Angle.BetweenPoints(enemy, player);
+                            temp=scene.physics.add.sprite(enemy.x, enemy.y, "magicBall");
+                            temp.body.allowGravity=false;
+                            temp.rotation=enemy.rotation;
+                            temp.body.velocity.x=200*Math.cos(enemy.rotation);
+                            temp.body.velocity.y=200*Math.sin(enemy.rotation);
+                        };
+                        break;
                 };
             };
             break;
@@ -1242,9 +1310,26 @@ function keyUp(e) {
 function mouseMove(e) {
 };
 function mouseDown(e) {
-    if (boardOpen&&e.x>=93&&e.x<=191&&e.y>=142&&e.y<=250) goToFight("burgerBot");
-    if (boardOpen&&e.x>=200&&e.x<=300&&e.y>=142&&e.y<=250) goToFight("snowy");
-    if (boardOpen&&e.x>=320&&e.x<=420&&e.y>=142&&e.y<=250) goToFight("mustard");
+    if (boardOpen) {
+        scene.children.list.filter(obj=>obj.getData?.("isBoardCharacter")).forEach(boardCharacter=>{
+            if (Phaser.Geom.Intersects.CircleToRectangle(new Phaser.Geom.Circle(e.x, e.y, 1), boardCharacter.getBounds())) {
+                switch (boardCharacter.texture.key) {
+                    case "burgerIdleL1":
+                        goToFight("burgerBot");
+                        break;
+                    case "snowyIdleR1":
+                        goToFight("snowy");
+                        break;
+                    case "mustard1":
+                        goToFight("mustard");
+                        break;
+                    case "woozrd":
+                        goToFight("woozrd");
+                        break;
+                };
+            }; 
+        });
+    };
 };
 function bindIsDown(bind) {
     for (let i in bind) if (keys.includes(bind[i])) return true;
@@ -1361,6 +1446,13 @@ function tryOpenBoard() {
     temp.setData("isBoardCharacter", true);
     temp.scale=2.5;
     if (beatenEnemies.includes("mustard")) {
+        temp.setData("defeated", true);
+        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    };
+    temp=scene.add.sprite(490, 196, "woozrd");
+    temp.setData("isBoardCharacter", true);
+    temp.scale=1.2;
+    if (beatenEnemies.includes("woozrd")) {
         temp.setData("defeated", true);
         temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
     };
@@ -1490,6 +1582,13 @@ function goToFight(fight) {
             enemy.displayWidth*=2.5;
             enemy.setCollideWorldBounds(false);
             break;
+        case "woozrd":
+            enemy.alpha=0;
+            enemy.displayWidth*=1.5;
+            enemy.displayHeight*=1.5;
+            enemy.body.allowGravity=false;
+            enemy.setCollideWorldBounds(false);
+            break;
     };
     enemyGroundCollider=scene.physics.add.collider(enemy, ground);
     scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
@@ -1526,6 +1625,16 @@ function initFight() {
             scene.physics.world.removeCollider(enemyGroundCollider);
             enemyActTimer=1000;
             endFightInit();
+            break;
+        case "woozrd":
+            enemyData={
+                fadingIn: true
+            };
+            scene.time.delayedCall(1000, ()=>{
+                enemyData.fadingIn=false;
+                endFightInit();
+            });
+            scene.physics.world.removeCollider(enemyGroundCollider);
             break;
     };
 };
@@ -1589,6 +1698,7 @@ function dropCoin() {
     temp.body.height*=2;
     temp.body.width*=2;
     scene.physics.add.collider(temp, ground);
+    if (Phaser.Geom.Intersects.RectangleToRectangle(temp.getBounds(), ground.getBounds())) temp.y=ground.body.top-temp.body.height/2;
 };
 function enemyHit(t) {
     enemyHp--;
@@ -1646,7 +1756,8 @@ function shouldDespawn(o) {
         isCharm(o),
         isPlayerShockwave(o),
         isCharisma(o),
-        isEnemyProjectile(o)
+        isEnemyProjectile(o),
+        keyTagged(o, "flash")
     ].filter(i=>!!i).length;
 };
 function isCharm(o) {
@@ -1662,7 +1773,7 @@ function isPlayerShockwave(o) {
     return keyTagged(o, "shockwave")||keyTagged(o, "hyperShockwave")||keyTagged(o, "devilShockwave");
 };
 function isEnemyProjectile(o) {
-    return keyTagged(o, "mustardProjectile")||keyTagged(o, "laser");
+    return keyTagged(o, "mustardProjectile")||keyTagged(o, "laser")||keyTagged(o, "magicBall");
 };
 function getType(thing) {
     switch (thing) {
