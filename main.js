@@ -571,6 +571,7 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/flash.png"
     }
 ];
+let emitters={};
 let T=0;
 let music;
 let onionLanded=false;
@@ -699,7 +700,7 @@ let fights={
     woozrd: {
         name: "Woozrd",
         spriteTag: "woozrd",
-        hp: 10,
+        hp: 15,
         startX: 320,
         startY: 240,
         startSpriteKey: "woozrd",
@@ -883,6 +884,12 @@ GameScene.preload=function() {
         pixelHeight: 150,
         palette: {"a": "#00FF00"}
     });
+    scene.textures.generate(`magicParticle`, {
+        data: ["a"],
+        pixelWidth: 4,
+        pixelHeight: 4,
+        palette: {"a": "#FF00D4"}
+    });
     scene.input.keyboard.on("keydown", keyDown);
     scene.input.keyboard.on("keyup", keyUp);
     scene.input.on("pointermove", mouseMove);
@@ -904,6 +911,9 @@ GameScene.create=function() {
 };
 GameScene.update=function(t) {
     T=t;
+    Object.keys(emitters).forEach(key=>{
+        if (!scene.children.getByName(key)) emitters[key].destroy();
+    });
     playerTouchingBoard=false;
     if (hp<=0) die();
     if (hp>maxHp) hp=maxHp;
@@ -1005,10 +1015,10 @@ GameScene.update=function(t) {
     scene.children.list.filter(obj=>keyTagged(obj, "magicBall")).forEach(magicBall=>{
         if (Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), magicBall.getBounds())) {
             playerHit();
-            magicBall.destroy();
+            destroyMagicBall(magicBall);
         };
-        scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{scene.physics.overlap(magicBall, shield, ()=>{magicBall.destroy()})});
-        magicBall?.body?.left>scene.game.canvas.width||magicBall?.body?.right<0?magicBall.destroy():"";
+        scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{scene.physics.overlap(magicBall, shield, ()=>{destroyMagicBall(magicBall)})});
+        magicBall?.body?.left>scene.game.canvas.width||magicBall?.body?.right<0?destroyMagicBall(magicBall):"";
     });
     scene.children.list.filter(obj=>keyTagged(obj, "devil", 6)).forEach(devil=>{
         devil.x=lastDirection?player.getTopLeft().x:player.getTopRight().x;
@@ -1241,6 +1251,24 @@ GameScene.update=function(t) {
                             enemy.y=ground.body.top-Math.random()*300;
                             enemy.rotation=Phaser.Math.Angle.BetweenPoints(enemy, player);
                             temp=scene.physics.add.sprite(enemy.x, enemy.y, "magicBall");
+                            temp.setName(`ball_${Object.keys(emitters).length}`);
+                            temp.setData("hueRotation", (Math.random()-.5)*360);
+                            temp.postFX.addColorMatrix().hue(temp.getData("hueRotation"));
+                            emitters[temp.name]=scene.add.particles(0, 0, "magicParticle", {
+                                follow: scene.children.getByName(`${temp.name}`),
+                                alpha: {
+                                    start: 1,
+                                    end: 0,
+                                    ease: "cubic.inout"
+                                },
+                                scale: {
+                                    onUpdate: (particle, key, time, value)=>{
+                                        return 1-Phaser.Math.Easing.Cubic.InOut(time);
+                                    }
+                                }
+                            });
+                            emitters[temp.name].postFX.addColorMatrix().hue(temp.getData("hueRotation"));
+                            temp.postFX.addBloom(0xff00d4, 1, 1, 1, 4);
                             temp.body.allowGravity=false;
                             temp.rotation=enemy.rotation;
                             temp.body.velocity.x=200*Math.cos(enemy.rotation);
@@ -1797,4 +1825,8 @@ function getType(thing) {
             if (boughtShopItems.includes("hyperCharm")) return "hyperCharisma";
             return "charisma";
     };
+};
+function destroyMagicBall(o) {
+    emitters[o.name].stop(false);
+    o.destroy();
 };
