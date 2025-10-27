@@ -626,6 +626,16 @@ let assetIndex=[
         id: "pewPew",
         url: "https://zkayns.github.io/reduxredux/assets/pewPew.png"
     },
+    {
+        name: "Tomato Idle L 1",
+        id: "tomatoIdleL1",
+        url: "https://zkayns.github.io/reduxredux/assets/tomatoIdleL1.png"
+    },
+    {
+        name: "Tomato Idle L 2",
+        id: "tomatoIdleL2",
+        url: "https://zkayns.github.io/reduxredux/assets/tomatoIdleL2.png"
+    },
 ];
 let emitters={};
 let T=0;
@@ -639,8 +649,14 @@ let player;
 let playerSpeed=240;
 let jumpHeight=240;
 let enemyHp=0;
+let currentDialog=0;
 let ground;
 let board;
+let tomatoDialog=[
+    "Sup, BO?",
+    "I just got some new swag from Pineapple. Check out these Yeesys.",
+    "Pretty cool, right?"
+];
 let onionFrame=1;
 let onionState="IdleR";
 let charmCooldown=1000;
@@ -653,12 +669,15 @@ let boardHoverEffect;
 let canMove=true;
 let playerTouchingBoard=false;
 let playerTouchingJim=false;
+let playerTouchingTomato=false;
+let talkingToTomato=false;
 let enemy;
 let enemyActTimer=0;
 let enemyState=0;
 let enemyFrame=1;
 let enemyGroundCollider;
 let enemyDead=false;
+let dialogOpen=false;
 let damageTaken=false;
 let coins=100;
 let shieldUp=false;
@@ -993,6 +1012,9 @@ GameScene.update=function(t) {
         temp=scene.physics.add.sprite(player.x, player.y, "devilR");
         temp.body.allowGravity=false;
     };
+    canMove=!(jimOpen+transitioningIntoFight+boardOpen+dead+dialogOpen);
+    player.setVelocityX((-bindIsDown(controls.player.moveLeft)*(playerSpeed+boughtShopItems.includes("shoes")*60)+bindIsDown(controls.player.moveRight)*(playerSpeed+boughtShopItems.includes("shoes")*60))*canMove);
+    onionState=`${((bindIsDown(controls.player.moveLeft)||bindIsDown(controls.player.moveRight))*canMove)?"Walk":"Idle"}${lastDirection?"R":"L"}`;
     if (jimOpen) {
         document.getElementById("money").innerHTML=`$${coins}`;
         document.getElementById("jimItemDesc").innerHTML="Sup, BO.<br>Hover over an item and I'll tell ya what it does.";
@@ -1113,9 +1135,6 @@ GameScene.update=function(t) {
         scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{scene.physics.overlap(pewPew, shield, ()=>{pewPew.destroy()})});
         pewPew?.body?.left>scene.game.canvas.width||pewPew?.body?.right<0?pewPew.destroy():"";
     });
-    canMove=!(jimOpen+transitioningIntoFight+boardOpen+dead);
-    player.setVelocityX((-bindIsDown(controls.player.moveLeft)*(playerSpeed+boughtShopItems.includes("shoes")*60)+bindIsDown(controls.player.moveRight)*(playerSpeed+boughtShopItems.includes("shoes")*60))*canMove);
-    onionState=`${((bindIsDown(controls.player.moveLeft)||bindIsDown(controls.player.moveRight))*canMove)?"Walk":"Idle"}${lastDirection?"R":"L"}`;
     if (onionState.slice(0,4)=="Idle") {
         if (gameFrame%30==0) onionFrame++;
         onionFrame=onionFrame%2;
@@ -1153,6 +1172,9 @@ GameScene.update=function(t) {
         case "town":
             playerTouchingBoard=Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), board.getBounds());
             playerTouchingJim=Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), daJim.getBounds());
+            playerTouchingTomato=Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), scene.children.getByName("tomato").getBounds());
+            scene.children.getByName("tomato").setTexture(`tomatoIdleL${Math.floor(gameFrame/30)%2+1}`);
+            scene.children.getByName("tomato").y=ground.body.top-scene.children.getByName("tomato").getBounds().height/2;
             scene.children.list.forEach(obj=>{
                 if (obj.getData?.("isBoardCharacter")&&!obj.getData("defeated")) {
                     if (Phaser.Geom.Intersects.CircleToRectangle(new Phaser.Geom.Circle(scene.input.mousePointer.x, scene.input.mousePointer.y, 1), obj.getBounds())&&!obj.getData("hasHoverEffect")) {
@@ -1448,6 +1470,7 @@ function keyDown(e) {
     e.key=="q"?hp--:"";
     (boardOpen||playerTouchingBoard)&&controls.player.interact.includes(e.key)?tryOpenBoard():"";
     (playerTouchingJim||jimOpen)&&controls.player.interact.includes(e.key)?tryOpenJim():"";
+    playerTouchingTomato&&!playerTouchingJim&&controls.player.interact.includes(e.key)?tryTomato():"";
     controls.game.screenshot.includes(e.key)?takeScreenshot():"";
 };
 function keyUp(e) {
@@ -1706,6 +1729,7 @@ function goToFight(fight) {
     board?.destroy();
     boardUi?.destroy();
     daJim?.destroy();
+    scene.children.getByName("tomato")?.destroy();
     damageTaken=false;
     boardOpen=false;
     transitioningIntoFight=true;
@@ -1870,6 +1894,10 @@ function createTownStructures() {
     daJim.displayWidth*=.4;
     daJim.displayHeight*=.4;
     daJim.depth=ground.depth-1;
+    temp=scene.physics.add.staticSprite(420, 376, "tomatoIdleL1");
+    temp.name="tomato";
+    temp.scale=2;
+    temp.depth=player.depth-1;
 };
 function dropCoin() {
     temp=scene.physics.add.sprite(enemy.x, enemy.y, damageTaken?"onionCoin":"ringCoin");
@@ -1978,6 +2006,31 @@ function getType(thing) {
             if (boughtShopItems.includes("hyperCharm")) return "hyperCharisma";
             return "charisma";
     };
+};
+function tryTomato() {
+    if (talkingToTomato) {
+        if (currentDialog+1<tomatoDialog.length) {
+            currentDialog++;
+            showDialog(tomatoDialog[currentDialog]);
+        } else {
+            closeDialog();
+            talkingToTomato=false;
+        };
+    } else {
+        talkingToTomato=true;
+        currentDialog=0;
+        showDialog(tomatoDialog[currentDialog]);
+    };
+}
+function showDialog(text) {
+    dialogOpen=true;
+    document.getElementById("dialog")?.remove();
+    temp=scene.add.dom(scene.game.canvas.width/2, scene.game.canvas.height/2+scene.game.canvas.height/4, "div", "border: 1px solid #00FF00; background-color: black; width: 480px; height: 160px; padding: 8px;", text);
+    temp.node.id="dialog";
+};
+function closeDialog() {
+    dialogOpen=false;
+    document.getElementById("dialog")?.remove();
 };
 function doBrockAttack() {
     enemy.body.velocity.x=500*Math.cos(Phaser.Math.Angle.BetweenPoints(enemy, player));
