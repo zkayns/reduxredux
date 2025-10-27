@@ -31,6 +31,12 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/Woozrd.mp3"
     },
     {
+        name: "Brock BGM",
+        audio: true,
+        id: "brockBgm",
+        url: "https://zkayns.github.io/reduxredux/assets/brock.mp3"
+    },
+    {
         name: "Da Jim BGM",
         audio: true,
         id: "jimJam",
@@ -788,7 +794,7 @@ let fights={
         startX: 512,
         startY: 344,
         startSpriteKey: "brockIdleL",
-        musicKey: "woozrdBgm"
+        musicKey: "brockBgm"
     }
 };
 let splashes=[
