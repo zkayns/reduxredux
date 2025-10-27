@@ -97,6 +97,11 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/inrg.png"
     },
     {
+        name: "Really Hot Sauce",
+        id: "reallyHotSauce",
+        url: "https://zkayns.github.io/reduxredux/assets/reallyHotSauce.png"
+    },
+    {
         name: "Shield Book",
         id: "shieldBook",
         url: "https://zkayns.github.io/reduxredux/assets/shieldBook.png"
@@ -813,6 +818,12 @@ let shopItems={
         description: "Makes your shield cooldown half a second shorter",
         cost: 2,
     },
+    reallyHotSauce: {
+        name: "Really Hot Sauce",
+        spriteKey: "reallyHotSauce",
+        description: "Makes your charm & up charm cooldowns a quarter of a second shorter",
+        cost: 3
+    },
     shield: {
         name: "Shield",
         spriteKey: "shieldBook",
@@ -871,7 +882,7 @@ let shopItems={
         cost: 3,
         requires: ["hyperSlam", "hyperCharm", "hyperShield"]
     }
-}
+};
 let config={
     type: Phaser.AUTO,
     width: 640,
@@ -1652,6 +1663,10 @@ function tryOpenJim() {
                         shieldCooldown-=500;  
                     case "soder":
                         shieldDuration+=500;
+                        break;
+                    case "reallyHotSauce":
+                        charmCooldown-=250;
+                        upCharmCooldown-=250;
                         break;
                 };
                 coins-=shopItems[temp].cost;
