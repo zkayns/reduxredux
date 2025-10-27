@@ -25,6 +25,12 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/Musturd Music.mp3"
     },
     {
+        name: "Woozrd BGM",
+        audio: true,
+        id: "woozrdBgm",
+        url: "https://zkayns.github.io/reduxredux/assets/Woozrd.mp3"
+    },
+    {
         name: "Da Jim BGM",
         audio: true,
         id: "jimJam",
@@ -569,7 +575,52 @@ let assetIndex=[
         name: "Flash",
         id: "flash",
         url: "https://zkayns.github.io/reduxredux/assets/flash.png"
-    }
+    },
+    {
+        name: "Brock Idle L",
+        id: "brockIdleL",
+        url: "https://zkayns.github.io/reduxredux/assets/brockIdleL.png"
+    },
+    {
+        name: "Brock Hit L",
+        id: "brockHitL",
+        url: "https://zkayns.github.io/reduxredux/assets/brockHitL.png"
+    },
+    {
+        name: "Brock L",
+        id: "brockL",
+        url: "https://zkayns.github.io/reduxredux/assets/brockL.png"
+    },
+    {
+        name: "Brock Mad L",
+        id: "brockMadL",
+        url: "https://zkayns.github.io/reduxredux/assets/brockMadL.png"
+    },
+    {
+        name: "Brock Splosion",
+        id: "brockSplosion",
+        url: "https://zkayns.github.io/reduxredux/assets/brockSplosion.png"
+    },
+    {
+        name: "Brock Sploded",
+        id: "brockSploded",
+        url: "https://zkayns.github.io/reduxredux/assets/brockSploded.png"
+    },
+    {
+        name: "Pew Pewer",
+        id: "pewPewer",
+        url: "https://zkayns.github.io/reduxredux/assets/pewPewer.png"
+    },
+    {
+        name: "Pew Pewer Pewing",
+        id: "pewPewerPewing",
+        url: "https://zkayns.github.io/reduxredux/assets/pewPewerPewing.png"
+    },
+    {
+        name: "Pew Pew",
+        id: "pewPew",
+        url: "https://zkayns.github.io/reduxredux/assets/pewPew.png"
+    },
 ];
 let emitters={};
 let T=0;
@@ -704,7 +755,16 @@ let fights={
         startX: 320,
         startY: 240,
         startSpriteKey: "woozrd",
-        musicKey: "mustardBgm"
+        musicKey: "woozrdBgm"
+    },
+    brock: {
+        name: "Brock",
+        spriteTag: "brock",
+        hp: 15,
+        startX: 512,
+        startY: 344,
+        startSpriteKey: "brockIdleL",
+        musicKey: "woozrdBgm"
     }
 };
 let splashes=[
@@ -1025,6 +1085,23 @@ GameScene.update=function(t) {
         devil.y=player.getTopLeft().y;
         devil.setTexture(`devil${lastDirection?"R":"L"}`);
     });
+    scene.children.list.filter(obj=>keyTagged(obj, "pewPewer")).forEach(pewPewer=>{
+        if (!enemyDead) {
+            pewPewer.rotation=Phaser.Math.Angle.BetweenPoints(pewPewer, player);
+            pewPewer.x=enemy.x;
+            pewPewer.y=enemy.y+enemy.height/1.25;
+        } else {
+            pewPewer.destroy();
+        };
+    });
+    scene.children.list.filter(obj=>keyTagged(obj, "pewPew", 6)).forEach(pewPew=>{
+        if (Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), pewPew.getBounds())) {
+            playerHit();
+            pewPew.destroy();
+        };
+        scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{scene.physics.overlap(pewPew, shield, ()=>{pewPew.destroy()})});
+        pewPew?.body?.left>scene.game.canvas.width||pewPew?.body?.right<0?pewPew.destroy():"";
+    });
     canMove=!(jimOpen+transitioningIntoFight+boardOpen+dead);
     player.setVelocityX((-bindIsDown(controls.player.moveLeft)*(playerSpeed+boughtShopItems.includes("shoes")*60)+bindIsDown(controls.player.moveRight)*(playerSpeed+boughtShopItems.includes("shoes")*60))*canMove);
     onionState=`${((bindIsDown(controls.player.moveLeft)||bindIsDown(controls.player.moveRight))*canMove)?"Walk":"Idle"}${lastDirection?"R":"L"}`;
@@ -1275,6 +1352,36 @@ GameScene.update=function(t) {
                             temp.body.velocity.y=200*Math.sin(enemy.rotation);
                         };
                         break;
+                    case "brock": // BROCK FIGHT
+                        if (enemyData.sploding) {
+                            enemy.x=enemyData.splodeX+Math.sign(Math.random()-.5)*3;
+                            enemy.y=enemyData.splodeY+Math.sign(Math.random()-.5)*3;
+                        };
+                        if (enemyHp<=0&&!enemyDead) { // ON DEATH
+                            enemyDead=true;
+                            enemy.setTexture("brockSplosion");
+                            enemyData.splodeX=enemy.x;
+                            enemyData.splodeY=enemy.y;
+                            enemyData.sploding=true;
+                            enemyActTimer=0;
+                        };
+                        if (enemyDead&&enemyData.sploding&&enemyActTimer>=500) { // ON STOP SPLODING
+                            enemyData.sploding=false;
+                            enemy.x=enemyData.splodeX;
+                            enemy.y=enemyData.splodeY;
+                            enemy.setTexture("brockSploded");
+                            enemy.body.allowGravity=true;
+                            scene.physics.world.removeCollider(enemyGroundCollider);
+                            enemy.setCollideWorldBounds(false);
+                        };
+                        if (!enemyDead) { // DURING FIGHT
+                            enemy.flipX=player.x-enemy.x>0;
+                        };
+                        if (enemyActTimer>=1500&&enemyHp>0) { // ON ATTACK
+                            enemyActTimer=0;
+                            doBrockAttack();
+                        };
+                        break;
                 };
             };
             break;
@@ -1353,6 +1460,9 @@ function mouseDown(e) {
                         break;
                     case "woozrd":
                         goToFight("woozrd");
+                        break;
+                    case "brockMadL":
+                        goToFight("brock");
                         break;
                 };
             }; 
@@ -1481,6 +1591,13 @@ function tryOpenBoard() {
     temp.setData("isBoardCharacter", true);
     temp.scale=1.2;
     if (beatenEnemies.includes("woozrd")) {
+        temp.setData("defeated", true);
+        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    };
+    temp=scene.add.sprite(142, 344, "brockMadL");
+    temp.setData("isBoardCharacter", true);
+    temp.scale=1.7;
+    if (beatenEnemies.includes("brock")) {
         temp.setData("defeated", true);
         temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
     };
@@ -1617,6 +1734,13 @@ function goToFight(fight) {
             enemy.body.allowGravity=false;
             enemy.setCollideWorldBounds(false);
             break;
+        case "brock":
+            enemy.scale=1.7;
+            temp=scene.add.sprite(enemy.x, enemy.y+enemy.height/1.25, "pewPewer");
+            temp.name="pewPewer";
+            temp.scale=1.5;
+            enemy.body.allowGravity=false;
+            break;
     };
     enemyGroundCollider=scene.physics.add.collider(enemy, ground);
     scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
@@ -1663,6 +1787,15 @@ function initFight() {
                 endFightInit();
             });
             scene.physics.world.removeCollider(enemyGroundCollider);
+            break;
+        case "brock":
+            enemyData={
+                sploding: false,
+                splodeX: 0,
+                splodeY: 0
+            };
+            enemy.setTexture("brockL");
+            endFightInit();
             break;
     };
 };
@@ -1785,7 +1918,7 @@ function shouldDespawn(o) {
         isPlayerShockwave(o),
         isCharisma(o),
         isEnemyProjectile(o),
-        keyTagged(o, "flash")
+        keyTagged(o, "flash"),
     ].filter(i=>!!i).length;
 };
 function isCharm(o) {
@@ -1801,7 +1934,7 @@ function isPlayerShockwave(o) {
     return keyTagged(o, "shockwave")||keyTagged(o, "hyperShockwave")||keyTagged(o, "devilShockwave");
 };
 function isEnemyProjectile(o) {
-    return keyTagged(o, "mustardProjectile")||keyTagged(o, "laser")||keyTagged(o, "magicBall");
+    return keyTagged(o, "mustardProjectile")||keyTagged(o, "laser")||keyTagged(o, "magicBall")||keyTagged(o, "pewPew", 6);
 };
 function getType(thing) {
     switch (thing) {
@@ -1825,6 +1958,25 @@ function getType(thing) {
             if (boughtShopItems.includes("hyperCharm")) return "hyperCharisma";
             return "charisma";
     };
+};
+function doBrockAttack() {
+    enemy.body.velocity.x=500*Math.cos(Phaser.Math.Angle.BetweenPoints(enemy, player));
+    enemy.body.velocity.y=500*Math.sin(Phaser.Math.Angle.BetweenPoints(enemy, player));
+    scene.time.delayedCall(200, ()=>{
+        enemy.body.velocity.x=0;
+        enemy.body.velocity.y=0;
+    });
+    temp2=scene.children.getByName("pewPewer");
+    temp2.setTexture("pewPewerPewing");
+    temp=scene.physics.add.sprite(temp2.x, temp2.y, "pewPew");
+    temp.rotation=Phaser.Math.Angle.BetweenPoints(temp, player);
+    temp.body.velocity.x=200*Math.cos(temp.rotation);
+    temp.body.velocity.y=200*Math.sin(temp.rotation);
+    temp.body.allowGravity=false;
+    temp.drag=1;
+    scene.time.delayedCall(250, ()=>{
+        if (scene.children.getByName("pewPewer")) scene.children.getByName("pewPewer").setTexture("pewPewer");
+    });
 };
 function destroyMagicBall(o) {
     emitters[o.name].stop(false);
