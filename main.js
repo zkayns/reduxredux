@@ -1834,6 +1834,10 @@ function leaveFight() {
     scene.sound.stopAll();
     music=scene.sound.add("townBgm").setLoop(true);
     music.play();
+    if (scene.children.getByName("coin")) {
+        coins+=scene.children.getByName("coin").texture.key.includes("ring")+1;
+        scene.children.getByName("coin").destroy();
+    };
     scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
 };
 function loadGameAssets() {
@@ -1858,6 +1862,7 @@ function dropCoin() {
     temp.displayHeight*=2;
     temp.body.height*=2;
     temp.body.width*=2;
+    temp.name="coin";
     scene.physics.add.collider(temp, ground);
     if (Phaser.Geom.Intersects.RectangleToRectangle(temp.getBounds(), ground.getBounds())) temp.y=ground.body.top-temp.body.height/2;
 };
