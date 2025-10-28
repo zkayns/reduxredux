@@ -1491,6 +1491,7 @@ GameScene.update=function(t) {
                                 playerHit();
                                 enemyData.hitThisCycle=true;
                             };
+                            if (enemyDead) temp.destroy();
                         };
                         if (enemyActTimer>1000&&enemyHp>0&&enemyState==0) { // ON JUMP
                             enemy.flipX=false;
@@ -2123,7 +2124,7 @@ function shouldDespawn(o) {
         isCharisma(o),
         isEnemyProjectile(o),
         isEnemyShockwave(o),
-        keyTagged(o, "flash"),
+        keyTagged(o, "flash")
     ].filter(i=>!!i).length;
 };
 function isCharm(o) {
