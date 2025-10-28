@@ -698,10 +698,52 @@ let enemyHp=0;
 let currentDialog=0;
 let ground;
 let board;
-let tomatoDialog=[
-    "Sup, BO?",
-    "I just got some new swag from Pineapple. Check out these Yeesys.",
-    "Pretty cool, right?"
+let tomatoDialog=new Array();
+let tomatoDialogOpts=[
+    [
+        "Sup, BO?",
+        "I just got some new swag from Pineapple. Check out these Yeesys.",
+        "Pretty cool, right?"
+    ],
+    [
+        "Sup, BO?",
+        "I heard that guy Boulder Borg has an invisible laser.",
+        "Pineapple says it goes through shields too, you should probably watch out."
+    ],
+    [
+        "Sup, BO?",
+        "We still don't know who broke Brock out.",
+        "Really weird, because all the cameras just like, went black.",
+        "Stay safe, man."
+    ],
+    [
+        "Sup, BO?",
+        "More reports of this weird \"quantum sickness\" have been coming in as of late.",
+        "Stay safe, man."
+    ],
+    [
+        "Sup, BO?",
+        "We've been seeing more robots as of late. We still don't know who or what is building them.",
+        "Stay safe, man."
+    ],
+    [
+        "Sup, BO?",
+        "Something's messing with my mind, man. It feels like something from another universe is trying to get into my head."
+    ],
+    [
+        "Sup, BO?",
+        "You'll always be the biggest onion."
+    ],
+    [
+        "Sup, BO?",
+        "Something sinister is happening, man. I have a feeling that things are about to get crazy.",
+        "Stay safe, man."
+    ],
+    [
+        "Sup, BO?",
+        "You ever wonder what happened to that weird looking \"hyper realistic\" onion?",
+        "I mean, I'm glad he's gone, it just seems kind of weird that we haven't seen him in a while."
+    ]
 ];
 let onionFrame=1;
 let onionState="IdleR";
@@ -2177,6 +2219,7 @@ function tryTomato() {
             stopDialog();
         };
     } else {
+        tomatoDialog=tomatoDialogOpts[Math.floor(tomatoDialogOpts.length*Math.random())];
         talkingToTomato=true;
         currentDialog=0;
         showDialog(tomatoDialog[currentDialog]);
