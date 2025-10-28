@@ -2227,6 +2227,5 @@ function destroyMagicBall(o) {
     o.destroy();
 };
 function swapDir(dir) {
-    temp="LRL";
-    return temp[temp.indexOf(dir)+1];
+    return "LRL"["LRL".indexOf(dir)+1];
 };
