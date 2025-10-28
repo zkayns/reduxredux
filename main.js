@@ -682,6 +682,41 @@ let assetIndex=[
         id: "boulderBorgShockwaveR",
         url: "https://zkayns.github.io/reduxredux/assets/boulderBorgShockwaveR.png"
     },
+    {
+        name: "Jay's Dad Ded",
+        id: "dadDed",
+        url: "https://zkayns.github.io/reduxredux/assets/dadDed.png"
+    },
+    {
+        name: "Jay's Dad Idle L 1",
+        id: "dadIdleL1",
+        url: "https://zkayns.github.io/reduxredux/assets/dadIdleL1.png"
+    },
+    {
+        name: "Jay's Dad Idle L 2",
+        id: "dadIdleL2",
+        url: "https://zkayns.github.io/reduxredux/assets/dadIdleL2.png"
+    },
+    {
+        name: "Jay's Dad Dying",
+        id: "dadDying",
+        url: "https://zkayns.github.io/reduxredux/assets/dadDying.png"
+    },
+    {
+        name: "Jay's Dad Anger L",
+        id: "dadAngerL",
+        url: "https://zkayns.github.io/reduxredux/assets/dadAngerL.png"
+    },
+    {
+        name: "Jay's Dad Shockwave L",
+        id: "dadShockwaveL",
+        url: "https://zkayns.github.io/reduxredux/assets/dadShockwaveL.png"
+    },
+    {
+        name: "Jay's Dad Shockwave R",
+        id: "dadShockwaveR",
+        url: "https://zkayns.github.io/reduxredux/assets/dadShockwaveR.png"
+    },
 ];
 let emitters={};
 let T=0;
@@ -886,6 +921,15 @@ let fights={
         startX: 512,
         startY: 344,
         startSpriteKey: "boulderBorgIdleL1",
+        musicKey: "brockBgm"
+    },
+    dad: {
+        name: "Jay's Dad",
+        spriteTag: "dad",
+        hp: 15,
+        startX: 512,
+        startY: 344,
+        startSpriteKey: "dadIdleL1",
         musicKey: "brockBgm"
     }
 };
@@ -1579,16 +1623,59 @@ GameScene.update=function(t) {
                             temp.y=ground.body.top-temp.height/2;
                             temp.depth=ground.depth-1;
                             temp.body.allowGravity=false;
+                            temp.body.drag=1;
                             temp=scene.physics.add.sprite(enemy.x, enemy.y, "boulderBorgShockwaveR");
                             temp.body.velocity.x=400;
                             temp.scale=2;
                             temp.y=ground.body.top-temp.height/2;
                             temp.depth=ground.depth-1;
                             temp.body.allowGravity=false;
+                            temp.body.drag=1;
                         };
                         if (enemyHp>0&&Phaser.Geom.Intersects.RectangleToRectangle(enemy.getBounds(), player.getBounds())) {
                             if (!enemyData.touchedLastFrame) playerHit();
                             enemyData.touchedLastFrame=true;
+                        };
+                        break;
+                    case "dad": // JAY'S DAD FIGHT
+                        if (enemyHp<=0&&!enemyDead) { // ON DEATH
+                            enemyDead=true;
+                            enemy.setTexture("dadDed");
+                            enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                            enemy.y=Math.min(ground.body.top-enemy.body.height, enemy.y);
+                        };
+                        if (enemyState==0&&enemyHp>0&&enemyActTimer>=1000) { // ON JUMP
+                            enemy.setCollideWorldBounds(false);
+                            enemyState=1;
+                            enemyActTimer=0;
+                            enemy.body.velocity.y=-800;
+                        };
+                        if (enemyState==1&&enemyHp>0&&enemy.y<-100) { // ON START FALL
+                            enemy.flipX=!enemy.flipX;
+                            enemy.x=player.x;
+                            enemy.y=-300;
+                            enemy.body.velocity.y=800;
+                            enemyState=2;
+                        };
+                        if (enemyState==2&&enemyHp>0&&enemy.body.bottom>=ground.body.top) { // ON LAND
+                            scene.cameras.main.shake(200);
+                            enemyState=0;
+                            enemyActTimer=0;
+                            temp=scene.physics.add.sprite(enemy.x, enemy.y, "dadShockwaveL");
+                            temp.scale=3;
+                            temp.y=ground.body.top-temp.height/2;
+                            temp.depth=ground.depth-1;
+                            temp.body.velocity.x=-600;
+                            temp.body.allowGravity=false;
+                            temp.body.drag=1;
+                            temp=scene.physics.add.sprite(enemy.x, enemy.y, "dadShockwaveR");
+                            temp.scale=3;
+                            temp.y=ground.body.top-temp.height/2;
+                            temp.depth=ground.depth-1;
+                            temp.body.velocity.x=600;
+                            temp.body.allowGravity=false;
+                            temp.body.drag=1;
+                            if (Phaser.Geom.Intersects.RectangleToRectangle(enemy.getBounds(), player.getBounds())) playerHit();
                         };
                         break;
                 };
@@ -1677,6 +1764,9 @@ function mouseDown(e) {
                         break;
                     case "boulderBorgIdleL1":
                         goToFight("boulderBorg");
+                        break;
+                    case "dadAngerL":
+                        goToFight("dad");
                         break;
                 };
             }; 
@@ -1818,6 +1908,12 @@ function tryOpenBoard() {
     temp=scene.add.sprite(256, 344, "boulderBorgIdleL1");
     temp.setData("isBoardCharacter", true);
     if (beatenEnemies.includes("boulderBorg")) {
+        temp.setData("defeated", true);
+        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    };
+    temp=scene.add.sprite(371, 344, "dadAngerL");
+    temp.setData("isBoardCharacter", true);
+    if (beatenEnemies.includes("dad")) {
         temp.setData("defeated", true);
         temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
     };
@@ -1970,6 +2066,10 @@ function goToFight(fight) {
             enemy.scale=2;
             enemy.y=ground.body.top-enemy.body.height;
             break;
+        case "dad":
+            enemy.scale=2;
+            enemy.y=ground.body.top-enemy.body.height;
+            break;
     };
     enemyGroundCollider=scene.physics.add.collider(enemy, ground);
     scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
@@ -2032,6 +2132,10 @@ function initFight() {
                 hitThisCycle: false,
                 touchedLastFrame: false
             },
+            enemyActTimer=10000;
+            endFightInit();
+            break;
+        case "dad":
             enemyActTimer=10000;
             endFightInit();
             break;
@@ -2185,7 +2289,7 @@ function isEnemyProjectile(o) {
     return keyTagged(o, "mustardProjectile")||keyTagged(o, "laser")||keyTagged(o, "magicBall")||keyTagged(o, "pewPew", 6);
 };
 function isEnemyShockwave(o) {
-    return keyTagged(o, "roboShockwave")||keyTagged(o, "boulderBorgShockwave");
+    return keyTagged(o, "roboShockwave")||keyTagged(o, "boulderBorgShockwave")||keyTagged(o, "dadShockwave");
 };
 function getType(thing) {
     switch (thing) {
