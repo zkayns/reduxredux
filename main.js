@@ -642,6 +642,46 @@ let assetIndex=[
         id: "tomatoIdleL2",
         url: "https://zkayns.github.io/reduxredux/assets/tomatoIdleL2.png"
     },
+    {
+        name: "Boulder Borg Idle L 1",
+        id: "boulderBorgIdleL1",
+        url: "https://zkayns.github.io/reduxredux/assets/boulderBorgIdleL1.png"
+    },
+    {
+        name: "Boulder Borg Idle L 2",
+        id: "boulderBorgIdleL2",
+        url: "https://zkayns.github.io/reduxredux/assets/boulderBorgIdleL2.png"
+    },
+    {
+        name: "Boulder Borg Jump L",
+        id: "boulderBorgJumpL",
+        url: "https://zkayns.github.io/reduxredux/assets/boulderBorgJumpL.png"
+    },
+    {
+        name: "Boulder Borg Jump R",
+        id: "boulderBorgJumpR",
+        url: "https://zkayns.github.io/reduxredux/assets/boulderBorgJumpR.png"
+    },
+    {
+        name: "Boulder Borg Thunder 1",
+        id: "boulderBorgThunder1",
+        url: "https://zkayns.github.io/reduxredux/assets/boulderBorgThunder1.png"
+    },
+    {
+        name: "Boulder Borg Thunder 2",
+        id: "boulderBorgThunder2",
+        url: "https://zkayns.github.io/reduxredux/assets/boulderBorgThunder2.png"
+    },
+    {
+        name: "Boulder Borg Shockwave L",
+        id: "boulderBorgShockwaveL",
+        url: "https://zkayns.github.io/reduxredux/assets/boulderBorgShockwaveL.png"
+    },
+    {
+        name: "Boulder Borg Shockwave R",
+        id: "boulderBorgShockwaveR",
+        url: "https://zkayns.github.io/reduxredux/assets/boulderBorgShockwaveR.png"
+    },
 ];
 let emitters={};
 let T=0;
@@ -718,7 +758,8 @@ let controls={
         interact: ["e"],
         slam: ["s", "ArrowDown"],
         shield: ["z"],
-        charmUp: ["x"]
+        charmUp: ["x"],
+        exitDialog: ["Escape"]
     },
     game: {
         togglePause: ["p"],
@@ -794,6 +835,15 @@ let fights={
         startX: 512,
         startY: 344,
         startSpriteKey: "brockIdleL",
+        musicKey: "brockBgm"
+    },
+    boulderBorg: {
+        name: "Boulder Borg",
+        spriteTag: "boulderBorg",
+        hp: 20,
+        startX: 512,
+        startY: 344,
+        startSpriteKey: "boulderBorgIdleL1",
         musicKey: "brockBgm"
     }
 };
@@ -1053,29 +1103,30 @@ GameScene.update=function(t) {
             charm.destroy();
             enemyHit(t);
         }); 
-        charm?.body?.left>scene.game.canvas.width||charm?.body?.right<0||charm?.body?.bottom<0||charm?.body?.top>scene.game.canvas.height?charm.destroy():"";
+        offscreenCheck(charm);
     });
     scene.children.list.filter(obj=>isCharisma(obj)).forEach(charisma=>{
-        scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>scene.physics.overlap(shield, charisma, ()=>charisma.destroy()));
         scene.physics.overlap(charisma, player, ()=>{
             charisma.destroy();
             playerHit();
         });
-        charisma?.body?.left>scene.game.canvas.width||charisma?.body?.right<0?charisma.destroy():"";
+        shieldCheck(charisma);
+        offscreenCheck(charisma);
     });
     scene.children.list.filter(obj=>isPlayerShockwave(obj)).forEach(shockwave=>{
         scene.physics.overlap(shockwave, enemy, ()=>{
             shockwave.destroy();
             enemyHit(t);
         });
-        shockwave?.body?.left>scene.game.canvas.width||shockwave?.body?.right<0?shockwave.destroy():"";
+        offscreenCheck(shockwave);
     });
-    scene.children.list.filter(obj=>keyTagged(obj, "roboShockwave")).forEach(roboShockwave=>{
-        scene.physics.overlap(roboShockwave, player, ()=>{
-            roboShockwave.destroy();
+    scene.children.list.filter(obj=>isEnemyShockwave(obj)).forEach(enemyShockwave=>{
+        scene.physics.overlap(enemyShockwave, player, ()=>{
+            enemyShockwave.destroy();
             playerHit();
         });
-        roboShockwave?.body?.left>scene.game.canvas.width||roboShockwave?.body?.right<0?roboShockwave.destroy():"";
+        shieldCheck(enemyShockwave);
+        offscreenCheck(enemyShockwave);
     });
     scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{
         shield.setFlip(lastDirection);
@@ -1098,7 +1149,7 @@ GameScene.update=function(t) {
                 laser.destroy();
                 playerHit();
             });
-            scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{scene.physics.overlap(laser, shield, ()=>{laser.destroy()})});
+            shieldCheck(laser);
         };
         laser?.body?.left>scene.game.canvas.width||laser?.body?.right<0?laser.destroy():"";
     });
@@ -1109,7 +1160,7 @@ GameScene.update=function(t) {
             mustard.setData("hitPlayer", true);
         };
         if (mustard.scale<=0) mustard.destroy();
-        scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{scene.physics.overlap(mustard, shield, ()=>{mustard.destroy()})});
+        shieldCheck(mustard);
     });
     scene.children.list.filter(obj=>keyTagged(obj, "magicBall")).forEach(magicBall=>{
         if (Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), magicBall.getBounds())) {
@@ -1138,8 +1189,8 @@ GameScene.update=function(t) {
             playerHit();
             pewPew.destroy();
         };
-        scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{scene.physics.overlap(pewPew, shield, ()=>{pewPew.destroy()})});
-        pewPew?.body?.left>scene.game.canvas.width||pewPew?.body?.right<0?pewPew.destroy():"";
+        shieldCheck(pewPew);
+        offscreenCheck(pewPew);
     });
     if (onionState.slice(0,4)=="Idle") {
         if (gameFrame%30==0) onionFrame++;
@@ -1421,6 +1472,82 @@ GameScene.update=function(t) {
                             doBrockAttack();
                         };
                         break;
+                    case "boulderBorg": // BOULDER BORG FIGHT
+                        if (enemyHp<=0&&!enemyDead) { // ON DEATH
+                            enemyDead=true;
+                            enemy.setCollideWorldBounds(false);
+                            enemy.setTexture(`boulderBorgJump${enemyData.direction}`);
+                            enemy.body.allowGravity=true;
+                            scene.physics.world.removeCollider(enemyGroundCollider);
+                            enemy.body.velocity.y=600;
+                        };
+                        if (enemyDead) { // AFTER DEATH
+                            enemy.rotation+=1;
+                        };
+                        if (scene.children.getByName("laser")) { // LASER STUFF
+                            temp=scene.children.getByName("laser");
+                            temp.x=enemy.x;
+                            if (Phaser.Geom.Intersects.RectangleToRectangle(temp.body, player.getBounds())&&!enemyData.hitThisCycle) {
+                                playerHit();
+                                enemyData.hitThisCycle=true;
+                            };
+                        };
+                        if (enemyActTimer>1000&&enemyHp>0&&enemyState==0) { // ON JUMP
+                            enemy.flipX=false;
+                            enemy.setTexture(`boulderBorgJump${enemyData.direction}`);
+                            enemy.body.velocity.y=-400;
+                            enemyActTimer=0;
+                            enemyState=1;
+                        };
+                        if (enemyActTimer>=500&&enemyState==1&&enemyHp>0) { // ON START THUNDER
+                            enemyData.hitThisCycle=false;
+                            enemy.setTexture("boulderBorgThunder2");
+                            enemy.body.velocity.x=(enemyData.direction=="L"?-1:1)*400;
+                            enemy.body.velocity.y=0;
+                            enemy.body.allowGravity=false;
+                            enemyState=2;
+                            enemyActTimer=0;
+                            temp=scene.physics.add.sprite(enemy.x, enemy.y, "__WHITE");
+                            temp.alpha=0;
+                            temp.body.width=16;
+                            temp.body.height=2048;
+                            temp.name="laser";
+                            temp.body.allowGravity=false;
+                        };
+                        if (enemyActTimer>1250&&enemyState==2&&enemyHp>0) { // ON STOP THUNDER
+                            enemyActTimer=0;
+                            enemyState=3;
+                            enemyData.direction=swapDir(enemyData.direction);
+                            enemy.setTexture(`boulderBorgJump${enemyData.direction}`);
+                            enemy.body.allowGravity=true;
+                            enemy.body.velocity.x=0;
+                            scene.children.getByName("laser").destroy();
+                        };
+                        if (enemyState==3&&enemy.body.bottom>=ground.body.top&&enemyHp>0) { // ON LAND
+                            enemy.y=ground.body.top-enemy.height;
+                            enemyState=0;
+                            enemyActTimer=0;
+                            enemy.setTexture(`boulderBorgIdleL1`);
+                            enemy.flipX=enemyData.direction=="R";
+                            enemy.body.bottom=ground.body.top;
+                            temp=scene.physics.add.sprite(enemy.x, enemy.y, "boulderBorgShockwaveL");
+                            temp.body.velocity.x=-400;
+                            temp.scale=2;
+                            temp.y=ground.body.top-temp.height/2;
+                            temp.depth=ground.depth-1;
+                            temp.body.allowGravity=false;
+                            temp=scene.physics.add.sprite(enemy.x, enemy.y, "boulderBorgShockwaveR");
+                            temp.body.velocity.x=400;
+                            temp.scale=2;
+                            temp.y=ground.body.top-temp.height/2;
+                            temp.depth=ground.depth-1;
+                            temp.body.allowGravity=false;
+                        };
+                        if (enemyHp>0&&Phaser.Geom.Intersects.RectangleToRectangle(enemy.getBounds(), player.getBounds())) {
+                            if (!enemyData.touchedLastFrame) playerHit();
+                            enemyData.touchedLastFrame=true;
+                        };
+                        break;
                 };
             };
             break;
@@ -1477,6 +1604,7 @@ function keyDown(e) {
     (boardOpen||playerTouchingBoard)&&controls.player.interact.includes(e.key)?tryOpenBoard():"";
     (playerTouchingJim||jimOpen)&&controls.player.interact.includes(e.key)?tryOpenJim():"";
     playerTouchingTomato&&!playerTouchingJim&&controls.player.interact.includes(e.key)?tryTomato():"";
+    dialogOpen&&controls.player.exitDialog.includes(e.key)?stopDialog():"";
     controls.game.screenshot.includes(e.key)?takeScreenshot():"";
 };
 function keyUp(e) {
@@ -1503,6 +1631,9 @@ function mouseDown(e) {
                         break;
                     case "brockMadL":
                         goToFight("brock");
+                        break;
+                    case "boulderBorgIdleL1":
+                        goToFight("boulderBorg");
                         break;
                 };
             }; 
@@ -1638,6 +1769,12 @@ function tryOpenBoard() {
     temp.setData("isBoardCharacter", true);
     temp.scale=1.7;
     if (beatenEnemies.includes("brock")) {
+        temp.setData("defeated", true);
+        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    };
+    temp=scene.add.sprite(256, 344, "boulderBorgIdleL1");
+    temp.setData("isBoardCharacter", true);
+    if (beatenEnemies.includes("boulderBorg")) {
         temp.setData("defeated", true);
         temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
     };
@@ -1786,6 +1923,10 @@ function goToFight(fight) {
             temp.scale=1.5;
             enemy.body.allowGravity=false;
             break;
+        case "boulderBorg":
+            enemy.scale=2;
+            enemy.y=ground.body.top-enemy.body.height;
+            break;
     };
     enemyGroundCollider=scene.physics.add.collider(enemy, ground);
     scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
@@ -1840,6 +1981,15 @@ function initFight() {
                 splodeY: 0
             };
             enemy.setTexture("brockL");
+            endFightInit();
+            break;
+        case "boulderBorg":
+            enemyData={
+                direction: "L",
+                hitThisCycle: false,
+                touchedLastFrame: false
+            },
+            enemyActTimer=10000;
             endFightInit();
             break;
     };
@@ -1972,6 +2122,7 @@ function shouldDespawn(o) {
         isPlayerShockwave(o),
         isCharisma(o),
         isEnemyProjectile(o),
+        isEnemyShockwave(o),
         keyTagged(o, "flash"),
     ].filter(i=>!!i).length;
 };
@@ -1989,6 +2140,9 @@ function isPlayerShockwave(o) {
 };
 function isEnemyProjectile(o) {
     return keyTagged(o, "mustardProjectile")||keyTagged(o, "laser")||keyTagged(o, "magicBall")||keyTagged(o, "pewPew", 6);
+};
+function isEnemyShockwave(o) {
+    return keyTagged(o, "roboShockwave")||keyTagged(o, "boulderBorgShockwave");
 };
 function getType(thing) {
     switch (thing) {
@@ -2019,15 +2173,14 @@ function tryTomato() {
             currentDialog++;
             showDialog(tomatoDialog[currentDialog]);
         } else {
-            closeDialog();
-            talkingToTomato=false;
+            stopDialog();
         };
     } else {
         talkingToTomato=true;
         currentDialog=0;
         showDialog(tomatoDialog[currentDialog]);
     };
-}
+};
 function showDialog(text) {
     dialogOpen=true;
     document.getElementById("dialog")?.remove();
@@ -2037,6 +2190,18 @@ function showDialog(text) {
 function closeDialog() {
     dialogOpen=false;
     document.getElementById("dialog")?.remove();
+};
+function stopDialog() {
+    dialogOpen=false;
+    document.getElementById("dialog")?.remove();
+    talkingToTomato=false;
+    currentDialog=0;
+};
+function shieldCheck(o) {
+    scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>scene.physics.overlap(shield, o, ()=>o.destroy()));
+};
+function offscreenCheck(o) {
+    o?.body?.left>scene.game.canvas.width||o?.body?.right<0||o?.body?.top>scene.game.canvas.height||o?.body?.bottom<0?o.destroy():"";
 };
 function doBrockAttack() {
     enemy.body.velocity.x=500*Math.cos(Phaser.Math.Angle.BetweenPoints(enemy, player));
@@ -2060,4 +2225,8 @@ function doBrockAttack() {
 function destroyMagicBall(o) {
     emitters[o.name].stop(false);
     o.destroy();
+};
+function swapDir(dir) {
+    temp="LRL";
+    return temp[temp.indexOf(dir)+1];
 };
