@@ -28,7 +28,7 @@ let assetIndex=[
         name: "Woozrd BGM",
         audio: true,
         id: "woozrdBgm",
-        url: "https://zkayns.github.io/reduxredux/assets/Woozrd.mp3"
+        url: "https://zkayns.github.io/reduxredux/assets/WoozrdNew.mp3"
     },
     {
         name: "Brock BGM",
