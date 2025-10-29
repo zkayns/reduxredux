@@ -1563,6 +1563,9 @@ GameScene.update=function(t) {
                             enemyActTimer=0;
                             doBrockAttack();
                         };
+                        if (!scene.children.getByName("pewPewer")) {
+                            makePewPewer();
+                        };
                         break;
                     case "boulderBorg": // BOULDER BORG FIGHT
                         if (enemyHp<=0&&!enemyDead) { // ON DEATH
@@ -2063,9 +2066,7 @@ function goToFight(fight) {
             break;
         case "brock":
             enemy.scale=1.7;
-            temp=scene.add.sprite(enemy.x, enemy.y+enemy.height/1.25, "pewPewer");
-            temp.name="pewPewer";
-            temp.scale=1.5;
+            makePewPewer();
             enemy.body.allowGravity=false;
             break;
         case "boulderBorg":
@@ -2365,7 +2366,7 @@ function doBrockAttack() {
         enemy.body.velocity.y=0;
     });
     temp2=scene.children.getByName("pewPewer");
-    if (temp2) temp2.setTexture("pewPewerPewing");
+    temp2.setTexture("pewPewerPewing");
     temp=scene.physics.add.sprite(temp2.x, temp2.y, "pewPew");
     temp.rotation=Phaser.Math.Angle.BetweenPoints(temp, player);
     temp.body.velocity.x=200*Math.cos(temp.rotation);
@@ -2379,6 +2380,11 @@ function doBrockAttack() {
 function destroyMagicBall(o) {
     emitters[o.name].stop(false);
     o.destroy();
+};
+function makePewPewer() {
+    temp=scene.add.sprite(enemy.x, enemy.y+enemy.height/1.25, "pewPewer");
+    temp.name="pewPewer";
+    temp.scale=1.5;
 };
 function swapDir(dir) {
     return "LRL"["LRL".indexOf(dir)+1];
