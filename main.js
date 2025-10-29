@@ -2365,7 +2365,7 @@ function doBrockAttack() {
         enemy.body.velocity.y=0;
     });
     temp2=scene.children.getByName("pewPewer");
-    temp2.setTexture("pewPewerPewing");
+    if (temp2) temp2.setTexture("pewPewerPewing");
     temp=scene.physics.add.sprite(temp2.x, temp2.y, "pewPew");
     temp.rotation=Phaser.Math.Angle.BetweenPoints(temp, player);
     temp.body.velocity.x=200*Math.cos(temp.rotation);
