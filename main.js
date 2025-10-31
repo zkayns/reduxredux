@@ -43,6 +43,12 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/BoulderBorg.mp3"
     },
     {
+        name: "Jay's Dad BGM",
+        audio: true,
+        id: "dadBgm",
+        url: "https://zkayns.github.io/reduxredux/assets/wack stuff.mp3"
+    },
+    {
         name: "Da Jim BGM",
         audio: true,
         id: "jimJam",
@@ -936,7 +942,7 @@ let fights={
         startX: 512,
         startY: 344,
         startSpriteKey: "dadIdleL1",
-        musicKey: "brockBgm"
+        musicKey: "dadBgm"
     }
 };
 let splashes=[
