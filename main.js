@@ -1224,8 +1224,8 @@ GameScene.update=function(t) {
         document.querySelectorAll(".jimItemContainer").forEach(i=>{
             i.style["filter"]=shopItems[i.id.split("_")[1]]?.unbuyable?"brightness(50%)":"";
             shopItems[i.id.split("_")[1]].requires?.map(requiredItem=>boughtShopItems.includes(requiredItem)).forEach(a=>!a?i.style["filter"]="brightness(50%)":"");
-            if (hp>=maxHp&&i.id.split("_")[1]=="extraLife") shopItems["extraLife"].unbuyable=true;
-            if (maxHp>=15&&i.id.split("_")[1]=="capLife") shopItems["capLife"].unbuyable=true;
+            shopItems["extraLife"].unbuyable=hp>=maxHp;
+            shopItems["capLife"].unbuyable=maxHp>=15;
             if (boughtShopItems.includes(i.id.split("_")[1])) i.remove();
         });
         document.querySelectorAll(".jimItemContainer:hover").forEach(i=>{
