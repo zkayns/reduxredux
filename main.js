@@ -729,6 +729,46 @@ let assetIndex=[
         id: "dadShockwaveR",
         url: "https://zkayns.github.io/reduxredux/assets/dadShockwaveR.png"
     },
+    {
+        name: "Omega UFB",
+        id: "omegaUFB",
+        url: "https://zkayns.github.io/reduxredux/assets/omegaUFB.png"
+    },
+    {
+        name: "Omega UFB Damage 1",
+        id: "omegaUFBDmg1",
+        url: "https://zkayns.github.io/reduxredux/assets/omegaUFBDmg1.png"
+    },
+    {
+        name: "Omega UFB Damage 2",
+        id: "omegaUFBDmg2",
+        url: "https://zkayns.github.io/reduxredux/assets/omegaUFBDmg2.png"
+    },
+    {
+        name: "Omega UFB Kaboom",
+        id: "omegaUFBKaboom",
+        url: "https://zkayns.github.io/reduxredux/assets/omegaUFBKaboom.png"
+    },
+    {
+        name: "Omega UFB Kaboom Again",
+        id: "omegaUFBKaboomAgain",
+        url: "https://zkayns.github.io/reduxredux/assets/omegaUFBKaboomAgain.png"
+    },
+    {
+        name: "Omega UFB Clapped",
+        id: "omegaUFBClapped",
+        url: "https://zkayns.github.io/reduxredux/assets/omegaUFBClapped.png"
+    },
+    {
+        name: "Tesla",
+        id: "tesla",
+        url: "https://zkayns.github.io/reduxredux/assets/tesla.png"
+    },
+    {
+        name: "Zap",
+        id: "zap",
+        url: "https://zkayns.github.io/reduxredux/assets/zap.png"
+    },
 ];
 let emitters={};
 let T=0;
@@ -943,6 +983,15 @@ let fights={
         startY: 344,
         startSpriteKey: "dadIdleL1",
         musicKey: "dadBgm"
+    },
+    omegaUFB: {
+        name: "Omega UFB",
+        spriteTag: "omegaUFB",
+        hp: 30,
+        startX: 320,
+        startY: 800,
+        startSpriteKey: "omegaUFB",
+        musicKey: "brockBgm"
     }
 };
 let splashes=[
@@ -1290,6 +1339,14 @@ GameScene.update=function(t) {
         shieldCheck(pewPew);
         offscreenCheck(pewPew);
     });
+    scene.children.list.filter(obj=>keyTagged(obj, "zap")).forEach(zap=>{
+        if (Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), zap.getBounds())) {
+            playerHit();
+            zap.destroy();
+        };
+        shieldCheck(zap);
+        offscreenCheck(zap);
+    });
     if (onionState.slice(0,4)=="Idle") {
         if (gameFrame%30==0) onionFrame++;
         onionFrame=onionFrame%2;
@@ -1303,6 +1360,18 @@ GameScene.update=function(t) {
             coin.destroy();
         };
     });
+    if (scene.children.getByName("teslaL")) {
+        temp=scene.children.getByName("teslaL");
+        temp.x=enemy.body.left+enemy.body.width/8;
+        temp.y=enemy.body.bottom-enemy.body.height/4;
+        temp.rotation=Phaser.Math.Angle.BetweenPoints(temp, player);
+    };
+    if (scene.children.getByName("teslaR")) {
+        temp=scene.children.getByName("teslaR");
+        temp.x=enemy.body.right-enemy.body.width/8;
+        temp.y=enemy.body.bottom-enemy.body.height/4;
+        temp.rotation=Phaser.Math.Angle.BetweenPoints(temp, player);
+    };
     if (slamming&&player.body.blocked.down) {
         slamming=false;
         temp=scene.physics.add.sprite(player.x, player.y, `${getType("shockwave")}L`);
@@ -1569,7 +1638,7 @@ GameScene.update=function(t) {
                             enemyActTimer=0;
                             doBrockAttack();
                         };
-                        if (!scene.children.getByName("pewPewer")) {
+                        if (!scene.children.getByName("pewPewer")) { // THIS IS STUPID AND DUMB!
                             makePewPewer();
                         };
                         break;
@@ -1693,6 +1762,81 @@ GameScene.update=function(t) {
                             if (Phaser.Geom.Intersects.RectangleToRectangle(enemy.getBounds(), player.getBounds())) playerHit();
                         };
                         break;
+                    case "omegaUFB": // OMEGA UFB FIGHT
+                        if (enemyHp<0&&!enemyDead) { // ON DEATH
+                            enemyDead=true;
+                            enemy.setTexture("omegaUFBClapped");
+                            enemyData.splodeX=enemy.x;
+                            enemy.body.allowGravity=true;
+                            scene.children.getByName("teslaL").destroy();
+                            scene.children.getByName("teslaR").destroy();
+                        };
+                        if (enemyDead) { // AFTER DEATH
+                            enemy.x=enemyData.splodeX+Math.sign(Math.random()-.5)*3;
+                        };
+                        if (enemyData.healTimer>=1200*(3-enemyState)&&!enemyDead) { // ON HEAL
+                            enemyData.healTimer=0;
+                            enemyHp=Math.min(enemyHp+1, fights[currentFight].hp);
+                        };
+                        if (enemyHp>0&&enemyActTimer>=2000-250*(enemyState==2)) { // ON FIRE TESLA
+                            zap();
+                            if (enemyState>=1) {
+                                scene.time.delayedCall(50, zap);
+                                scene.time.delayedCall(150, zap);
+                                scene.time.delayedCall(250, zap);
+                                scene.time.delayedCall(350, zap);
+                                scene.time.delayedCall(450, zap);
+                                scene.time.delayedCall(550, zap);
+                                scene.time.delayedCall(650, zap);
+                                scene.time.delayedCall(750, zap);
+                                scene.time.delayedCall(850, zap);
+                                scene.time.delayedCall(950, zap);
+                            };
+                            scene.time.delayedCall(100, zap);
+                            scene.time.delayedCall(200, zap);
+                            scene.time.delayedCall(300, zap);
+                            scene.time.delayedCall(400, zap);
+                            scene.time.delayedCall(500, zap);
+                            scene.time.delayedCall(600, zap);
+                            scene.time.delayedCall(700, zap);
+                            scene.time.delayedCall(800, zap);
+                            scene.time.delayedCall(900, zap);
+                            enemyActTimer=0;
+                        };
+                        if (enemyState==0&&enemyHp<=20) { // ON SWITCH TO DAMAGED LEVEL 1
+                            enemyData.wrappedAround=false;
+                            enemyActTimer=-1000000000;
+                            enemyData.switchingPhase=true;
+                            enemy.setTexture("omegaUFBKaboom");
+                            enemy.body.velocity.x=750;
+                            scene.time.delayedCall(1000, ()=>{
+                                enemy.setTexture("omegaUFBDmg1");
+                                enemyData.wrappedAround=true;
+                                enemy.x=-150;
+                            });
+                            enemyState=1;
+                        };
+                        if (enemyState==1&&enemyHp<=10) { // ON SWITCH TO DAMAGED LEVEL 2
+                            enemyData.wrappedAround=false;
+                            enemyActTimer=-1000000000;
+                            enemyData.switchingPhase=true;
+                            enemy.setTexture("omegaUFBKaboomAgain");
+                            enemy.body.velocity.x=750;
+                            scene.time.delayedCall(1000, ()=>{
+                                enemy.setTexture("omegaUFBDmg2");
+                                enemyData.wrappedAround=true;
+                                enemy.x=-150;
+                            });
+                            enemyState=2;
+                        };
+                        if (enemyData.wrappedAround&&enemyData.switchingPhase&&enemy.x>=scene.game.canvas.width/2) { // ON FINISH PHASE SWITCH
+                            enemyData.switchingPhase=false;
+                            enemy.body.velocity.x=0;
+                            enemy.x=scene.game.canvas.width/2;
+                            enemyActTimer=2000;
+                        };
+                        enemyData.healTimer+=t-lastT;
+                        break;
                 };
             };
             break;
@@ -1782,6 +1926,16 @@ function mouseDown(e) {
                         break;
                     case "dadAngerL":
                         goToFight("dad");
+                        break;
+                    case "omegaUFB":
+                        if (!beatenEnemies.includes("burgerBot")) break;
+                        if (!beatenEnemies.includes("snowy")) break;
+                        if (!beatenEnemies.includes("mustard")) break;
+                        if (!beatenEnemies.includes("woozrd")) break;
+                        if (!beatenEnemies.includes("brock")) break;
+                        if (!beatenEnemies.includes("boulderBorg")) break;
+                        if (!beatenEnemies.includes("dad")) break;
+                        goToFight("omegaUFB");
                         break;
                 };
             }; 
@@ -1929,6 +2083,13 @@ function tryOpenBoard() {
     temp=scene.add.sprite(371, 344, "dadAngerL");
     temp.setData("isBoardCharacter", true);
     if (beatenEnemies.includes("dad")) {
+        temp.setData("defeated", true);
+        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    };
+    temp=scene.add.sprite(490, 344, "omegaUFB");
+    temp.setData("isBoardCharacter", true);
+    temp.scale=.5;
+    if (beatenEnemies.includes("omegaUFB")) {
         temp.setData("defeated", true);
         temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
     };
@@ -2083,6 +2244,15 @@ function goToFight(fight) {
             enemy.scale=2;
             enemy.y=ground.body.top-enemy.body.height;
             break;
+        case "omegaUFB":
+            enemy.depth=ground.depth-100;
+            enemy.width*=2;
+            enemy.height*=2;
+            enemy.displayWidth*=2;
+            enemy.displayHeight*=2;
+            enemy.body.allowGravity=false;
+            enemy.setCollideWorldBounds(false);
+            break;
     };
     enemyGroundCollider=scene.physics.add.collider(enemy, ground);
     scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
@@ -2152,6 +2322,31 @@ function initFight() {
             enemyActTimer=10000;
             endFightInit();
             break;
+        case "omegaUFB":
+            enemyData={
+                switchingPhase: false,
+                wrappedAround: false,
+                healTimer: 0,
+                splodeX: 0
+            };
+            scene.physics.world.removeCollider(enemyGroundCollider);
+            enemy.body.allowGravity=true;
+            enemy.body.velocity.y=-700;
+            temp=scene.add.sprite(enemy.body.left, enemy.body.bottom, "tesla");
+            temp.setName("teslaL");
+            temp.depth=enemy.depth+1;
+            temp.scale=2;
+            temp=scene.add.sprite(enemy.body.right, enemy.body.bottom, "tesla");
+            temp.setName("teslaR");
+            temp.depth=enemy.depth+1;
+            temp.scale=2;
+            scene.time.delayedCall(2250, ()=>{
+                enemy.body.allowGravity=false;
+                enemy.body.velocity.y=0;
+                enemyActTimer=0;
+                endFightInit();
+            })
+            break;
     };
 };
 function endFightInit() {
@@ -2165,6 +2360,9 @@ function endFightInit() {
     temp2.style["margin-top"]="-6px";
     temp2.id="enemyHealthBar";
     temp2.innerHTML=`[${"|".repeat(enemyHp)}<span style='color: black'>${"|".repeat(fights[currentFight].hp-enemyHp)}</span>]`;
+    if (currentFight=="omegaUFB") {
+        temp2.style["font-size"]="10px";  
+    };
     temp.node.appendChild(temp2);
     temp=scene.add.dom(0, 0, "div", "", "");
     temp.node.id="onionUi";
@@ -2226,7 +2424,7 @@ function dropCoin() {
     if (Phaser.Geom.Intersects.RectangleToRectangle(temp.getBounds(), ground.getBounds())) temp.y=ground.body.top-temp.body.height/2;
 };
 function enemyHit(t) {
-    enemyHp--;
+    if (!enemyData?.switchingPhase) enemyHp--;
     lastHit=t;
     if (hitEffect) enemy.postFX.remove(hitEffect);
     hitEffect=enemy.postFX.addGradient(0xffffff, 0xffffff, .75, 0, 0, 1, 1, 0);
@@ -2299,7 +2497,7 @@ function isPlayerShockwave(o) {
     return keyTagged(o, "shockwave")||keyTagged(o, "hyperShockwave")||keyTagged(o, "devilShockwave");
 };
 function isEnemyProjectile(o) {
-    return keyTagged(o, "mustardProjectile")||keyTagged(o, "laser")||keyTagged(o, "magicBall")||keyTagged(o, "pewPew", 6);
+    return keyTagged(o, "mustardProjectile")||keyTagged(o, "laser")||keyTagged(o, "magicBall")||keyTagged(o, "pewPew", 6)||keyTagged(o, "zap");
 };
 function isEnemyShockwave(o) {
     return keyTagged(o, "roboShockwave")||keyTagged(o, "boulderBorgShockwave")||keyTagged(o, "dadShockwave");
@@ -2359,6 +2557,7 @@ function stopDialog() {
     currentDialog=0;
 };
 function shieldCheck(o) {
+    if (keyTagged(o, "zap")&&enemyState==2) return false;
     scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>scene.physics.overlap(shield, o, ()=>o.destroy()));
 };
 function offscreenCheck(o) {
@@ -2386,6 +2585,28 @@ function doBrockAttack() {
 function destroyMagicBall(o) {
     emitters[o.name].stop(false);
     o.destroy();
+};
+function zap() {
+    if (enemyData.switchingPhase) return false;
+    let teslaL=scene.children.getByName("teslaL");
+    let teslaR=scene.children.getByName("teslaR");
+    if (!teslaL||!teslaR) return false;
+    temp=scene.physics.add.sprite(teslaL.x, teslaL.y, "zap");
+    temp.body.allowGravity=false;
+    temp.body.drag=1;
+    temp.rotation=teslaL.rotation;
+    temp.body.velocity.x=(400+enemyState*50)*Math.cos(temp.rotation);
+    temp.body.velocity.y=(400+enemyState*50)*Math.sin(temp.rotation);
+    temp.scale=2+(enemyState==2)/2;
+    if (enemyState==2) temp.postFX.addColorMatrix().brightness(1.3);
+    temp=scene.physics.add.sprite(teslaR.x, teslaR.y, "zap");
+    temp.body.allowGravity=false;
+    temp.body.drag=1;
+    temp.rotation=teslaL.rotation;
+    temp.body.velocity.x=(400+enemyState*50)*Math.cos(temp.rotation);
+    temp.body.velocity.y=(400+enemyState*50)*Math.sin(temp.rotation);
+    temp.scale=2+(enemyState==2)/2;
+    if (enemyState==2) temp.postFX.addColorMatrix().brightness(1.3);
 };
 function makePewPewer() {
     temp=scene.add.sprite(enemy.x, enemy.y+enemy.height/1.25, "pewPewer");
