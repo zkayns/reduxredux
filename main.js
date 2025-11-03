@@ -892,7 +892,8 @@ let controls={
     },
     game: {
         togglePause: ["p"],
-        screenshot: ["`"]
+        screenshot: ["`"],
+        toggleDebug: ["-"]
     }
 };
 let currentFight;
@@ -900,6 +901,7 @@ let scene;
 let jumps=0;
 let temp;
 let temp2;
+let debug=false;
 let dead=false;
 let maxHp=12;
 let hp=12;
@@ -1780,27 +1782,7 @@ GameScene.update=function(t) {
                         };
                         if (enemyHp>0&&enemyActTimer>=2000-250*(enemyState==2)) { // ON FIRE TESLA
                             zap();
-                            if (enemyState>=1) {
-                                scene.time.delayedCall(50, zap);
-                                scene.time.delayedCall(150, zap);
-                                scene.time.delayedCall(250, zap);
-                                scene.time.delayedCall(350, zap);
-                                scene.time.delayedCall(450, zap);
-                                scene.time.delayedCall(550, zap);
-                                scene.time.delayedCall(650, zap);
-                                scene.time.delayedCall(750, zap);
-                                scene.time.delayedCall(850, zap);
-                                scene.time.delayedCall(950, zap);
-                            };
-                            scene.time.delayedCall(100, zap);
-                            scene.time.delayedCall(200, zap);
-                            scene.time.delayedCall(300, zap);
-                            scene.time.delayedCall(400, zap);
-                            scene.time.delayedCall(500, zap);
-                            scene.time.delayedCall(600, zap);
-                            scene.time.delayedCall(700, zap);
-                            scene.time.delayedCall(800, zap);
-                            scene.time.delayedCall(900, zap);
+                            for (let n in new Uint8Array(10*Math.pow(2, enemyState))) scene.time.delayedCall(n*100/(enemyState+1+(enemyState==2)), zap);
                             enemyActTimer=0;
                         };
                         if (enemyState==0&&enemyHp<=20) { // ON SWITCH TO DAMAGED LEVEL 1
@@ -1895,6 +1877,7 @@ function keyDown(e) {
     playerTouchingTomato&&!playerTouchingJim&&controls.player.interact.includes(e.key)?tryTomato():"";
     dialogOpen&&controls.player.exitDialog.includes(e.key)?stopDialog():"";
     controls.game.screenshot.includes(e.key)?takeScreenshot():"";
+    controls.game.toggleDebug.includes(e.key)?debug=!debug:"";
 };
 function keyUp(e) {
     while (keys.includes(e.key)) keys.splice(keys.indexOf(e.key), 1);
@@ -1928,13 +1911,15 @@ function mouseDown(e) {
                         goToFight("dad");
                         break;
                     case "omegaUFB":
-                        if (!beatenEnemies.includes("burgerBot")) break;
-                        if (!beatenEnemies.includes("snowy")) break;
-                        if (!beatenEnemies.includes("mustard")) break;
-                        if (!beatenEnemies.includes("woozrd")) break;
-                        if (!beatenEnemies.includes("brock")) break;
-                        if (!beatenEnemies.includes("boulderBorg")) break;
-                        if (!beatenEnemies.includes("dad")) break;
+                        if (!debug) {
+                            if (!beatenEnemies.includes("burgerBot")) break;
+                            if (!beatenEnemies.includes("snowy")) break;
+                            if (!beatenEnemies.includes("mustard")) break;
+                            if (!beatenEnemies.includes("woozrd")) break;
+                            if (!beatenEnemies.includes("brock")) break;
+                            if (!beatenEnemies.includes("boulderBorg")) break;
+                            if (!beatenEnemies.includes("dad")) break;
+                        };
                         goToFight("omegaUFB");
                         break;
                 };
@@ -2595,16 +2580,16 @@ function zap() {
     temp.body.allowGravity=false;
     temp.body.drag=1;
     temp.rotation=teslaL.rotation;
-    temp.body.velocity.x=(400+enemyState*50)*Math.cos(temp.rotation);
-    temp.body.velocity.y=(400+enemyState*50)*Math.sin(temp.rotation);
+    temp.body.velocity.x=(400+enemyState*75)*Math.cos(temp.rotation);
+    temp.body.velocity.y=(400+enemyState*75)*Math.sin(temp.rotation);
     temp.scale=2+(enemyState==2)/2;
     if (enemyState==2) temp.postFX.addColorMatrix().brightness(1.3);
     temp=scene.physics.add.sprite(teslaR.x, teslaR.y, "zap");
     temp.body.allowGravity=false;
     temp.body.drag=1;
     temp.rotation=teslaL.rotation;
-    temp.body.velocity.x=(400+enemyState*50)*Math.cos(temp.rotation);
-    temp.body.velocity.y=(400+enemyState*50)*Math.sin(temp.rotation);
+    temp.body.velocity.x=(400+enemyState*75)*Math.cos(temp.rotation);
+    temp.body.velocity.y=(400+enemyState*75)*Math.sin(temp.rotation);
     temp.scale=2+(enemyState==2)/2;
     if (enemyState==2) temp.postFX.addColorMatrix().brightness(1.3);
 };
