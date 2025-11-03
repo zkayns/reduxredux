@@ -1874,7 +1874,7 @@ function keyDown(e) {
     e.key=="q"?hp--:"";
     (boardOpen||playerTouchingBoard)&&controls.player.interact.includes(e.key)?tryOpenBoard():"";
     (playerTouchingJim||jimOpen)&&controls.player.interact.includes(e.key)?tryOpenJim():"";
-    playerTouchingTomato&&!playerTouchingJim&&controls.player.interact.includes(e.key)?tryTomato():"";
+    ((playerTouchingTomato&&!playerTouchingJim)||talkingToTomato)&&controls.player.interact.includes(e.key)?tryTomato():"";
     dialogOpen&&controls.player.exitDialog.includes(e.key)?stopDialog():"";
     controls.game.screenshot.includes(e.key)?takeScreenshot():"";
     controls.game.toggleDebug.includes(e.key)?debug=!debug:"";
