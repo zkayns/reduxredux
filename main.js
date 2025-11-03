@@ -49,6 +49,12 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/wack stuff.mp3"
     },
     {
+        name: "Omega UFB BGM",
+        audio: true,
+        id: "omegaUFBBgm",
+        url: "https://zkayns.github.io/reduxredux/assets/Holy krab final.mp3"
+    },
+    {
         name: "Da Jim BGM",
         audio: true,
         id: "jimJam",
@@ -993,7 +999,7 @@ let fights={
         startX: 320,
         startY: 800,
         startSpriteKey: "omegaUFB",
-        musicKey: "brockBgm"
+        musicKey: "omegaUFBBgm"
     }
 };
 let splashes=[
