@@ -1416,8 +1416,8 @@ GameScene.update=function(t) {
             break;
         default:
             if (!transitioningIntoFight&&enemyHp>0&&!dead) {
-                document.getElementById("enemyHealthBar").innerHTML=`[${"|".repeat(enemyHp)}<span style='color: black'>${"|".repeat(fights[currentFight].hp-enemyHp)}</span>]`;
-                document.getElementById("onionHealthBar").innerHTML=`[${"|".repeat(hp)}<span style='color: black'>${"|".repeat(maxHp-hp)}</span>]`;
+                document.getElementById("enemyHealthBar").innerHTML=`[${"|".repeat(Math.max(enemyHp, 1))}<span style='color: black'>${"|".repeat(Math.max(fights[currentFight].hp-enemyHp, 0))}</span>]`;
+                document.getElementById("onionHealthBar").innerHTML=`[${"|".repeat(Math.max(hp, 1))}<span style='color: black'>${"|".repeat(Math.max(maxHp-hp, 0))}</span>]`;
             };
             if (currentFight=="woozrd"&&enemyData?.fadingIn&&transitioningIntoFight) enemy.alpha+=.03;
             if (hitEffect&&t-lastHit>200) enemy.postFX.remove(hitEffect);
@@ -2580,16 +2580,16 @@ function zap() {
     temp.body.allowGravity=false;
     temp.body.drag=1;
     temp.rotation=teslaL.rotation;
-    temp.body.velocity.x=(400+enemyState*75)*Math.cos(temp.rotation);
-    temp.body.velocity.y=(400+enemyState*75)*Math.sin(temp.rotation);
+    temp.body.velocity.x=(425+enemyState*100)*Math.cos(temp.rotation);
+    temp.body.velocity.y=(425+enemyState*100)*Math.sin(temp.rotation);
     temp.scale=2+(enemyState==2)/2;
     if (enemyState==2) temp.postFX.addColorMatrix().brightness(1.3);
     temp=scene.physics.add.sprite(teslaR.x, teslaR.y, "zap");
     temp.body.allowGravity=false;
     temp.body.drag=1;
     temp.rotation=teslaL.rotation;
-    temp.body.velocity.x=(400+enemyState*75)*Math.cos(temp.rotation);
-    temp.body.velocity.y=(400+enemyState*75)*Math.sin(temp.rotation);
+    temp.body.velocity.x=(425+enemyState*100)*Math.cos(temp.rotation);
+    temp.body.velocity.y=(425+enemyState*100)*Math.sin(temp.rotation);
     temp.scale=2+(enemyState==2)/2;
     if (enemyState==2) temp.postFX.addColorMatrix().brightness(1.3);
 };
