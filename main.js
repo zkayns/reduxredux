@@ -781,6 +781,51 @@ let assetIndex=[
         id: "zap",
         url: "https://zkayns.github.io/reduxredux/assets/zap.png"
     },
+    {
+        name: "Glunk Anry L",
+        id: "glunkAnryL",
+        url: "https://zkayns.github.io/reduxredux/assets/glunkAnryL.png"
+    },
+    {
+        name: "Glunk Anry R",
+        id: "glunkAnryR",
+        url: "https://zkayns.github.io/reduxredux/assets/glunkAnryR.png"
+    },
+    {
+        name: "Glunk Idle L",
+        id: "glunkIdleL",
+        url: "https://zkayns.github.io/reduxredux/assets/glunkIdleL.png"
+    },
+    {
+        name: "Glunk Dude",
+        id: "glunkDude",
+        url: "https://zkayns.github.io/reduxredux/assets/glunkDude.png"
+    },
+    {
+        name: "Glunk Jump L",
+        id: "glunkJumpL",
+        url: "https://zkayns.github.io/reduxredux/assets/glunkJumpL.png"
+    },
+    {
+        name: "Glunk Jump R",
+        id: "glunkJumpR",
+        url: "https://zkayns.github.io/reduxredux/assets/glunkJumpR.png"
+    },
+    {
+        name: "Glunk Slep",
+        id: "glunkSlep",
+        url: "https://zkayns.github.io/reduxredux/assets/glunkSlep.png"
+    },
+    {
+        name: "Glunk Slep 2",
+        id: "glunkSlep2",
+        url: "https://zkayns.github.io/reduxredux/assets/glunkSlep2.png"
+    },
+    {
+        name: "Glunk Splosion",
+        id: "glunkSplosion",
+        url: "https://zkayns.github.io/reduxredux/assets/glunkSplosion.png"
+    },
 ];
 let phase2=false;
 let emitters={};
@@ -867,7 +912,7 @@ let enemyGroundCollider;
 let enemyDead=false;
 let dialogOpen=false;
 let damageTaken=false;
-let coins=100;
+let coins=0;
 let shieldUp=false;
 let shieldDuration=1000;
 let shieldCooldown=3000;
@@ -906,7 +951,11 @@ let controls={
     game: {
         togglePause: ["p"],
         screenshot: ["`"],
-        toggleDebug: ["-"]
+        toggleDebug: ["-"],
+        debug: {
+            initPhase2: ["="],
+            bigMoney: [";"]
+        }
     }
 };
 let currentFight;
@@ -1006,6 +1055,15 @@ let fights={
         startX: 320,
         startY: 800,
         startSpriteKey: "omegaUFB",
+        musicKey: "omegaUFBBgm"
+    },
+    glunk: {
+        name: "Glunk",
+        spriteTag: "glunk",
+        hp: 20,
+        startX: 512,
+        startY: 344,
+        startSpriteKey: "glunkSlep",
         musicKey: "omegaUFBBgm"
     }
 };
@@ -1434,7 +1492,7 @@ GameScene.update=function(t) {
             };
             if (currentFight=="woozrd"&&enemyData?.fadingIn&&transitioningIntoFight) enemy.alpha+=.03;
             if (hitEffect&&t-lastHit>200) enemy.postFX.remove(hitEffect);
-            if (!transitioningIntoFight) { // IF CURRENTLY IN FIGHT
+            if (!transitioningIntoFight) { // IF CURRENTLY FIGHTING
                 enemyActTimer+=t-lastT;
                 if (enemyDead&&document.getElementById("enemyUi")) { // ON DEATH, REGARDLESS OF ENEMY
                     dropCoin();
@@ -1779,7 +1837,7 @@ GameScene.update=function(t) {
                         };
                         break;
                     case "omegaUFB": // OMEGA UFB FIGHT
-                        if (enemyHp<0&&!enemyDead) { // ON DEATH
+                        if (enemyHp<=0&&!enemyDead) { // ON DEATH
                             enemyDead=true;
                             initPhase2();
                             enemy.setTexture("omegaUFBClapped");
@@ -1833,6 +1891,67 @@ GameScene.update=function(t) {
                             enemyActTimer=2000;
                         };
                         enemyData.healTimer+=t-lastT;
+                        break;
+                    case "glunk": // GLUNK FIGHT
+                        enemyData.hitRect=enemy.getBounds();
+                        enemyData.hitRect.height=enemy.getBounds().height/4;
+                        enemyData.hitRect.y=enemy.y+enemy.getBounds().height/4;
+                        /*
+                        scene.children.getByName("test")?.destroy();
+                        scene.add.rectangle(enemyData.hitRect.centerX, enemyData.hitRect.centerY, enemyData.hitRect.width, enemyData.hitRect.height, 0xff0000).setName("test");
+                        */
+                        if (enemyHp<=0&&!enemyDead) { // ON DEATH
+                            enemyDead=true;
+                            enemy.setTexture("glunkSplosion");
+                            enemy.body.allowGravity=false;
+                            enemy.body.velocity.x=0;
+                            enemy.body.velocity.y=0;
+                            enemy.body.setEnable(false);
+                        };
+                        if (enemyDead) { // AFTER DEATH
+                            enemy.alpha=Math.max(enemy.alpha-.03, 0);
+                        };
+                        if (enemyActTimer>=500&&enemyState==0&&!enemyDead) { // ON JUMP
+                            enemyState=1;
+                            enemyActTimer=0;
+                            enemyData.hitThisJump=false;
+                            enemy.setTexture(`glunkJump${player.x>enemy.x?"R":"L"}`);
+                            enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                            enemy.body.velocity.y=-200;
+                            enemy.body.velocity.x=Math.sign(player.x-enemy.x)*210;
+                        };
+                        if (Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), enemyData.hitRect)&&!enemyDead) { // PLAYER HIT STUFF
+                            if (enemyState==1&&!enemyData.hitThisJump) { // ON AIR HIT
+                                enemyData.hitThisJump=true;
+                                playerHit();
+                            };
+                            if (enemyState==0&&!enemyData.groundHit) { // ON GROUND HIT
+                                enemyData.groundHit=true;
+                                playerHit();
+                            };
+                        };
+                        if (enemyState==1&&enemy.body.bottom>=ground.body.top&&enemyActTimer>50&&!enemyDead) { // ON LAND
+                            enemyActTimer=0;
+                            enemyState=0;
+                            enemy.body.velocity.x=0;
+                            enemy.setTexture(`glunkAnry${player.x>enemy.x?"R":"L"}`);
+                            enemyData.groundHit=false;
+                        };
+                        break;
+                };
+            } else { // OTHER STUFF, ALSO RUNS DURiNG TRANSITION
+                switch (currentFight) {
+                    case "glunk":
+                        if (enemyData.isSlep) {
+                            if (enemyData.slepTimer>=1000) {
+                                enemyData.slepString=enemyData.slepString==""?"2":"";
+                                enemyData.slepTimer=0;
+                                enemy.setTexture(`glunkSlep${enemyData.slepString}`);
+                                enemy.body.setSize(scene.textures.get(enemy.texture.key).getSourceImage().width, scene.textures.get(enemy.texture.key).getSourceImage().height);
+                                enemy.y=ground.body.top-enemy.body.height/2;
+                            };
+                            enemyData.slepTimer+=t-lastT;
+                        };
                         break;
                 };
             };
@@ -1895,6 +2014,10 @@ function keyDown(e) {
     boardOpen&&controls.player.exit.includes(e.key)?tryOpenBoard():"";
     controls.game.screenshot.includes(e.key)?takeScreenshot():"";
     controls.game.toggleDebug.includes(e.key)?debug=!debug:"";
+    if (debug) {
+        controls.game.debug.initPhase2.includes(e.key)?initPhase2():"";
+        controls.game.debug.bigMoney.includes(e.key)?coins=10000:"";
+    };
 };
 function keyUp(e) {
     while (keys.includes(e.key)) keys.splice(keys.indexOf(e.key), 1);
@@ -1938,6 +2061,9 @@ function mouseDown(e) {
                             if (!beatenEnemies.includes("dad")) break;
                         };
                         goToFight("omegaUFB");
+                        break;
+                    case "glunkAnryL":
+                        goToFight("glunk");
                         break;
                 };
             }; 
@@ -2041,7 +2167,7 @@ function tryOpenBoard() {
     boardOpen=true;
     boardUi=scene.add.sprite(scene.game.canvas.width/2, scene.game.canvas.height/2, "boardUi");
     boardUi.scale=.66;
-    if (phase2==false) {
+    if (!phase2) { // PHASE 1 FIGHTS - BOARD
         temp=scene.add.sprite(142, 196, "burgerIdleL1");
         temp.setData("isBoardCharacter", true);
         temp.scale=1.5;
@@ -2093,6 +2219,14 @@ function tryOpenBoard() {
         temp.setData("isBoardCharacter", true);
         temp.scale=.5;
         if (beatenEnemies.includes("omegaUFB")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
+    } else { // PHASE 2 FIGHTS - BOARD
+        temp=scene.add.sprite(142, 196, "glunkAnryL");
+        temp.setData("isBoardCharacter", true);
+        temp.scale=2;
+        if (beatenEnemies.includes("glunk")) {
             temp.setData("defeated", true);
             temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
         };
@@ -2257,6 +2391,18 @@ function goToFight(fight) {
             enemy.body.allowGravity=false;
             enemy.setCollideWorldBounds(false);
             break;
+        case "glunk":
+            enemyData={
+                slepTimer: 1000,
+                slepString: "2",
+                isSlep: true,
+                hitThisJump: false,
+                hitRect: "",
+                groundHit: false
+            };
+            enemy.scale=2;
+            enemy.y=ground.body.top-enemy.body.height;
+            break;
     };
     enemyGroundCollider=scene.physics.add.collider(enemy, ground);
     scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
@@ -2349,7 +2495,19 @@ function initFight() {
                 enemy.body.velocity.y=0;
                 enemyActTimer=0;
                 endFightInit();
-            })
+            });
+            break;
+        case "glunk":
+            enemyData.isSlep=false;
+            scene.time.delayedCall(1000, ()=>{
+                enemy.setTexture("glunkAnryL");
+                enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                enemy.y=ground.body.top-enemy.body.height/2;
+                scene.time.delayedCall(1000, ()=>{
+                    enemyActTimer=1000;
+                    endFightInit();
+                });
+            });
             break;
     };
 };
