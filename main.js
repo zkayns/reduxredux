@@ -1664,6 +1664,7 @@ GameScene.update=function(t) {
                             enemy.setTexture(`boulderBorgJump${enemyData.direction}`);
                             enemy.body.allowGravity=true;
                             scene.physics.world.removeCollider(enemyGroundCollider);
+                            enemy.body.velocity.x=0;
                             enemy.body.velocity.y=600;
                         };
                         if (enemyDead) { // AFTER DEATH
