@@ -844,6 +844,7 @@ let currentDialog=0;
 let ground;
 let board;
 let tomatoDialog=new Array();
+let playerRect;
 let tomatoDialogOpts=[
     [
         "Sup, BO?",
@@ -1290,6 +1291,11 @@ GameScene.update=function(t) {
     };
     canMove=!(jimOpen+transitioningIntoFight+boardOpen+dead+dialogOpen);
     player.setVelocityX((-bindIsDown(controls.player.moveLeft)*(playerSpeed+boughtShopItems.includes("shoes")*60)+bindIsDown(controls.player.moveRight)*(playerSpeed+boughtShopItems.includes("shoes")*60))*canMove);
+    playerRect=player.getBounds();
+    playerRect.height/=2;
+    playerRect.y+=playerRect.height/1.25;
+    /*scene.children.getByName("hitbox")?.destroy();
+    scene.add.rectangle(playerRect.centerX, playerRect.centerY, playerRect.width, playerRect.height, 0xff0000).setName("hitbox");*/
     onionState=`${((bindIsDown(controls.player.moveLeft)||bindIsDown(controls.player.moveRight))*canMove)?"Walk":"Idle"}${lastDirection?"R":"L"}`;
     if (jimOpen) {
         document.getElementById("money").innerHTML=`$${coins}`;
@@ -1326,10 +1332,10 @@ GameScene.update=function(t) {
         offscreenCheck(charm);
     });
     scene.children.list.filter(obj=>isCharisma(obj)).forEach(charisma=>{
-        scene.physics.overlap(charisma, player, ()=>{
+        if (Phaser.Geom.Intersects.RectangleToRectangle(charisma.getBounds(), playerRect)) {
             charisma.destroy();
             playerHit();
-        });
+        };
         shieldCheck(charisma);
         offscreenCheck(charisma);
     });
@@ -1341,10 +1347,10 @@ GameScene.update=function(t) {
         offscreenCheck(shockwave);
     });
     scene.children.list.filter(obj=>isEnemyShockwave(obj)).forEach(enemyShockwave=>{
-        scene.physics.overlap(enemyShockwave, player, ()=>{
+        if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, enemyShockwave.getBounds())) {
             enemyShockwave.destroy();
             playerHit();
-        });
+        };
         shieldCheck(enemyShockwave);
         offscreenCheck(enemyShockwave);
     });
@@ -1365,17 +1371,17 @@ GameScene.update=function(t) {
                 laser.body.velocity.x=200*Math.cos(laser.rotation);
                 laser.body.velocity.y=200*Math.sin(laser.rotation);
             };
-            scene.physics.overlap(laser, player, ()=>{
+            if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, laser.getBounds())) {
                 laser.destroy();
                 playerHit();
-            });
+            };
             shieldCheck(laser);
         };
         laser?.body?.left>scene.game.canvas.width||laser?.body?.right<0?laser.destroy():"";
     });
     scene.children.list.filter(obj=>keyTagged(obj, "mustardProjectile")).forEach(mustard=>{
         mustard.scale-=.05;
-        if (!mustard.getData("hitPlayer")&&Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), mustard.getBounds())) {
+        if (!mustard.getData("hitPlayer")&&Phaser.Geom.Intersects.RectangleToRectangle(playerRect, mustard.getBounds())) {
             playerHit();
             mustard.setData("hitPlayer", true);
         };
@@ -1383,7 +1389,7 @@ GameScene.update=function(t) {
         shieldCheck(mustard);
     });
     scene.children.list.filter(obj=>keyTagged(obj, "magicBall")).forEach(magicBall=>{
-        if (Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), magicBall.getBounds())) {
+        if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, magicBall.getBounds())) {
             playerHit();
             destroyMagicBall(magicBall);
         };
@@ -1405,7 +1411,7 @@ GameScene.update=function(t) {
         };
     });
     scene.children.list.filter(obj=>keyTagged(obj, "pewPew", 6)).forEach(pewPew=>{
-        if (Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), pewPew.getBounds())) {
+        if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, pewPew.getBounds())) {
             playerHit();
             pewPew.destroy();
         };
@@ -1413,7 +1419,7 @@ GameScene.update=function(t) {
         offscreenCheck(pewPew);
     });
     scene.children.list.filter(obj=>keyTagged(obj, "zap")).forEach(zap=>{
-        if (Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), zap.getBounds())) {
+        if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, zap.getBounds())) {
             playerHit();
             zap.destroy();
         };
@@ -1428,7 +1434,7 @@ GameScene.update=function(t) {
         onionFrame=onionFrame%3;
     };
     scene.children.list.filter(obj=>obj.type=="Sprite").filter(obj=>obj.texture.key.includes("Coin")).forEach(coin=>{
-        if (Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), coin.getBounds())) {
+        if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, coin.getBounds())) {
             coins+=coin.texture.key.includes("ring")?2:1;
             coin.destroy();
         };
@@ -2806,6 +2812,9 @@ function initPhase2() {
             "Stay safe, man."
         ]
     ];
+};
+function hitCheck(thing1, thing2) {
+    return Phaser.Geom.Intersects.RectangleToRectangle(thing1, thing2);
 };
 function swapDir(dir) {
     return "LRL"["LRL".indexOf(dir)+1];
