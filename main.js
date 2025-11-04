@@ -7,6 +7,12 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/ReduxReduxMenu.mp3"
     },
     {
+        name: "Phase 2 BGM",
+        audio: true,
+        id: "phase2Bgm",
+        url: "https://zkayns.github.io/reduxredux/assets/Phase2BGM.mp3"
+    },
+    {
         name: "Burger Bot BGM",
         audio: true,
         id: "burgerBotBgm",
@@ -776,6 +782,7 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/zap.png"
     },
 ];
+let phase2=false;
 let emitters={};
 let T=0;
 let music;
@@ -894,7 +901,7 @@ let controls={
         slam: ["s", "ArrowDown"],
         shield: ["z"],
         charmUp: ["x"],
-        exitDialog: ["Escape"]
+        exit: ["Escape"]
     },
     game: {
         togglePause: ["p"],
@@ -1207,7 +1214,7 @@ GameScene.create=function() {
     createTownStructures();
     player.y=ground.body.top-player.body.height/2;
     player.x=player.body.width;
-    music=scene.sound.add("townBgm").setLoop(true);
+    music=scene.sound.add(phase2?"phase2Bgm":"townBgm").setLoop(true);
     music.play();
 };
 GameScene.update=function(t) {
@@ -1773,6 +1780,7 @@ GameScene.update=function(t) {
                     case "omegaUFB": // OMEGA UFB FIGHT
                         if (enemyHp<0&&!enemyDead) { // ON DEATH
                             enemyDead=true;
+                            initPhase2();
                             enemy.setTexture("omegaUFBClapped");
                             enemyData.splodeX=enemy.x;
                             enemy.body.allowGravity=true;
@@ -1881,7 +1889,9 @@ function keyDown(e) {
     (boardOpen||playerTouchingBoard)&&controls.player.interact.includes(e.key)?tryOpenBoard():"";
     (playerTouchingJim||jimOpen)&&controls.player.interact.includes(e.key)?tryOpenJim():"";
     ((playerTouchingTomato&&!playerTouchingJim)||talkingToTomato)&&controls.player.interact.includes(e.key)?tryTomato():"";
-    dialogOpen&&controls.player.exitDialog.includes(e.key)?stopDialog():"";
+    dialogOpen&&controls.player.exit.includes(e.key)?stopDialog():"";
+    jimOpen&&controls.player.exit.includes(e.key)?tryOpenJim():"";
+    boardOpen&&controls.player.exit.includes(e.key)?tryOpenBoard():"";
     controls.game.screenshot.includes(e.key)?takeScreenshot():"";
     controls.game.toggleDebug.includes(e.key)?debug=!debug:"";
 };
@@ -2030,59 +2040,61 @@ function tryOpenBoard() {
     boardOpen=true;
     boardUi=scene.add.sprite(scene.game.canvas.width/2, scene.game.canvas.height/2, "boardUi");
     boardUi.scale=.66;
-    temp=scene.add.sprite(142, 196, "burgerIdleL1");
-    temp.setData("isBoardCharacter", true);
-    temp.scale=1.5;
-    if (beatenEnemies.includes("burgerBot")) {
-        temp.setData("defeated", true);
-        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
-    };
-    temp=scene.add.sprite(250, 196, "snowyIdleR1");
-    temp.setData("isBoardCharacter", true);
-    temp.scale=2;
-    if (beatenEnemies.includes("snowy")) {
-        temp.setData("defeated", true);
-        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
-    };
-    temp=scene.add.sprite(373, 196, "mustard1");
-    temp.setData("isBoardCharacter", true);
-    temp.scale=2.5;
-    if (beatenEnemies.includes("mustard")) {
-        temp.setData("defeated", true);
-        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
-    };
-    temp=scene.add.sprite(490, 196, "woozrd");
-    temp.setData("isBoardCharacter", true);
-    temp.scale=1.2;
-    if (beatenEnemies.includes("woozrd")) {
-        temp.setData("defeated", true);
-        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
-    };
-    temp=scene.add.sprite(142, 344, "brockMadL");
-    temp.setData("isBoardCharacter", true);
-    temp.scale=1.7;
-    if (beatenEnemies.includes("brock")) {
-        temp.setData("defeated", true);
-        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
-    };
-    temp=scene.add.sprite(256, 344, "boulderBorgIdleL1");
-    temp.setData("isBoardCharacter", true);
-    if (beatenEnemies.includes("boulderBorg")) {
-        temp.setData("defeated", true);
-        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
-    };
-    temp=scene.add.sprite(371, 344, "dadAngerL");
-    temp.setData("isBoardCharacter", true);
-    if (beatenEnemies.includes("dad")) {
-        temp.setData("defeated", true);
-        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
-    };
-    temp=scene.add.sprite(490, 344, "omegaUFB");
-    temp.setData("isBoardCharacter", true);
-    temp.scale=.5;
-    if (beatenEnemies.includes("omegaUFB")) {
-        temp.setData("defeated", true);
-        temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+    if (phase2==false) {
+        temp=scene.add.sprite(142, 196, "burgerIdleL1");
+        temp.setData("isBoardCharacter", true);
+        temp.scale=1.5;
+        if (beatenEnemies.includes("burgerBot")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
+        temp=scene.add.sprite(250, 196, "snowyIdleR1");
+        temp.setData("isBoardCharacter", true);
+        temp.scale=2;
+        if (beatenEnemies.includes("snowy")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
+        temp=scene.add.sprite(373, 196, "mustard1");
+        temp.setData("isBoardCharacter", true);
+        temp.scale=2.5;
+        if (beatenEnemies.includes("mustard")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
+        temp=scene.add.sprite(490, 196, "woozrd");
+        temp.setData("isBoardCharacter", true);
+        temp.scale=1.2;
+        if (beatenEnemies.includes("woozrd")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
+        temp=scene.add.sprite(142, 344, "brockMadL");
+        temp.setData("isBoardCharacter", true);
+        temp.scale=1.7;
+        if (beatenEnemies.includes("brock")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
+        temp=scene.add.sprite(256, 344, "boulderBorgIdleL1");
+        temp.setData("isBoardCharacter", true);
+        if (beatenEnemies.includes("boulderBorg")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
+        temp=scene.add.sprite(371, 344, "dadAngerL");
+        temp.setData("isBoardCharacter", true);
+        if (beatenEnemies.includes("dad")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
+        temp=scene.add.sprite(490, 344, "omegaUFB");
+        temp.setData("isBoardCharacter", true);
+        temp.scale=.5;
+        if (beatenEnemies.includes("omegaUFB")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
     };
 };
 function tryOpenJim() {
@@ -2093,7 +2105,7 @@ function tryOpenJim() {
         document.getElementById("pineappleWhoManagesDaJim")?.remove();
         document.getElementById("money")?.remove();
         document.getElementById("exitSign")?.remove();
-        music=scene.sound.add("townBgm").setLoop(true);
+        music=scene.sound.add(phase2?"phase2Bgm":"townBgm").setLoop(true);
         music.play();
         jimOpen=false;
         return false;
@@ -2376,7 +2388,7 @@ function leaveFight() {
     createTownStructures();
     enemy?.destroy();
     scene.sound.stopAll();
-    music=scene.sound.add("townBgm").setLoop(true);
+    music=scene.sound.add(phase2?"phase2Bgm":"townBgm").setLoop(true);
     music.play();
     if (scene.children.getByName("coin")) {
         coins+=scene.children.getByName("coin").texture.key.includes("ring")+1;
@@ -2603,6 +2615,38 @@ function makePewPewer() {
     temp=scene.add.sprite(enemy.x, enemy.y+enemy.height/1.25, "pewPewer");
     temp.name="pewPewer";
     temp.scale=1.5;
+};
+function initPhase2() {
+    phase2=true;
+    tomatoDialogOpts=[
+        [
+            "Sup, BO?",
+            "We've got Brock in the slammer, but his goons are still getting orders from somewhere.",
+            "The thing is, we don't have any idea where those orders could be coming from.",
+            "Stay safe, man."
+        ], 
+        [
+            "Sup, BO?",
+            "People across the town are reporting some pretty intense symptoms.",
+            "We're trying to find out where this quantum sickness came from, but we're drawing blanks.",
+            "Stay safe, man."
+        ],
+        [
+            "Sup, BO?",
+            "We're getting reports of strange hallucinations of a \"hyper realistic onion\" going around.",
+            "Stay safe, man."
+        ],
+        [
+            "Sup, BO?",
+            "Insomnia is beocoming more frequent as of late, and we think it might be a result of the quantum sickness.",
+            "Stay safe, man."
+        ],
+        [
+            "Sup, BO?",
+            "Our scientists have determined that there is a tear in the fabric of reality somewhere.",
+            "Stay safe, man."
+        ]
+    ];
 };
 function swapDir(dir) {
     return "LRL"["LRL".indexOf(dir)+1];
