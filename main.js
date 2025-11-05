@@ -67,6 +67,12 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/The Glunk.mp3"
     },
     {
+        name: "Glork BGM",
+        audio: true,
+        id: "glorkBgm",
+        url: "https://zkayns.github.io/reduxredux/assets/The Glork.mp3"
+    },
+    {
         name: "Da Jim BGM",
         audio: true,
         id: "jimJam",
@@ -83,6 +89,11 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/boardUi.png"
     },
     {
+        name: "Phase 2 Board UI",
+        id: "phase2BoardUi",
+        url: "https://zkayns.github.io/reduxredux/assets/phase2BoardUi.png"
+    },
+    {
         name: "Board Nameplate",
         id: "boardNameplate",
         url: "https://zkayns.github.io/reduxredux/assets/boardNameplate.svg"
@@ -91,6 +102,11 @@ let assetIndex=[
         name: "Board Sheets",
         id: "boardSheets",
         url: "https://zkayns.github.io/reduxredux/assets/boardSheets.png"
+    },
+    {
+        name: "Finale Note",
+        id: "finaleNote",
+        url: "https://zkayns.github.io/reduxredux/assets/finaleNote.png"
     },
     {
         name: "Da Jim",
@@ -1117,7 +1133,7 @@ let fights={
         startX: 512,
         startY: 344,
         startSpriteKey: "glorkIdleL",
-        musicKey: "glunkBgm"
+        musicKey: "glorkBgm"
     }
 };
 let splashes=[
@@ -1539,6 +1555,14 @@ GameScene.update=function(t) {
             scene.children.getByName("tomato").setTexture(`tomatoIdleL${Math.floor(gameFrame/30)%2+1}`);
             scene.children.getByName("tomato").y=ground.body.top-scene.children.getByName("tomato").getBounds().height/2;
             scene.children.list.forEach(obj=>{
+                if (keyTagged(obj, "finaleNote")) {
+                    obj.x=obj.getData("initPos").x+Math.sign(Math.random()-.5)*3;
+                    obj.y=obj.getData("initPos").y+Math.sign(Math.random()-.5)*3;
+                    if (gameFrame%3==0) {
+                        obj.data.values.matrix.reset();
+                        obj.data.values.matrix.brightness(Math.random()>.5?0:100);
+                    };
+                };
                 if (obj.getData?.("isBoardCharacter")&&!obj.getData("defeated")) {
                     if (Phaser.Geom.Intersects.CircleToRectangle(new Phaser.Geom.Circle(scene.input.mousePointer.x, scene.input.mousePointer.y, 1), obj.getBounds())&&!obj.getData("hasHoverEffect")) {
                         boardHoverEffect=obj.postFX.addGradient(0xffffff, 0xffffff, .75, 0, 0, 1, 1, 0);
@@ -2322,12 +2346,13 @@ function urlOfAsset(name) {
 function tryOpenBoard() {
     if (boardOpen) {
         boardUi.destroy();
+        scene.children.getByName("finaleNote")?.destroy();
         scene.children.list.filter(c=>c.getData?.("isBoardCharacter")).forEach(c=>c.destroy());
         boardOpen=false;
         return false;
     };
     boardOpen=true;
-    boardUi=scene.add.sprite(scene.game.canvas.width/2, scene.game.canvas.height/2, "boardUi");
+    boardUi=scene.add.sprite(scene.game.canvas.width/2, scene.game.canvas.height/2, phase2?"phase2BoardUi":"boardUi");
     boardUi.scale=.66;
     if (!phase2) { // PHASE 1 FIGHTS - BOARD
         temp=scene.add.sprite(142, 196, "burgerIdleL1");
@@ -2385,6 +2410,11 @@ function tryOpenBoard() {
             temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
         };
     } else { // PHASE 2 FIGHTS - BOARD
+        temp=scene.add.sprite(491, 347, "finaleNote");
+        temp.setData("initPos", {x: temp.x, y: temp.y});
+        temp.name="finaleNote";
+        temp.setData("matrix", temp.postFX.addColorMatrix());
+        temp.scale=.7;
         temp=scene.add.sprite(142, 196, "glunkAnryL");
         temp.setData("isBoardCharacter", true);
         temp.scale=2;
@@ -2494,6 +2524,7 @@ function goToFight(fight) {
     board?.destroy();
     boardUi?.destroy();
     daJim?.destroy();
+    scene.children.getByName("finaleNote")?.destroy();
     scene.children.getByName("tomato")?.destroy();
     damageTaken=false;
     boardOpen=false;
