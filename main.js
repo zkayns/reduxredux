@@ -2012,6 +2012,7 @@ GameScene.update=function(t) {
                             enemy.body.velocity.y=30;
                             scene.physics.world.removeCollider(enemyGroundCollider);
                             enemyData.isDance=true;
+                            enemyData.danceTimer=10000;
                             enemy.body.allowGravity=false;
                             scene.time.delayedCall(2500, ()=>{
                                 enemy.x=player.x;
@@ -2046,8 +2047,8 @@ GameScene.update=function(t) {
                             temp.body.drag=1;
                             temp.body.velocity.x=200;
                         };
-                        if (enemyData.isDance) { // GLORK DANCE ANIM
-                            if (enemyData.danceTimer>=333) {
+                        if (enemyData.isDance) { // GLORK DIG ANIM
+                            if (enemyData.danceTimer>=66.6666) {
                                 enemyData.danceTimer=0;
                                 enemyData.danceDir=swapDir(enemyData.danceDir);
                                 enemy.setTexture(`glorkIdle${enemyData.danceDir}`);
@@ -2196,7 +2197,7 @@ function mouseDown(e) {
                     case "glunkAnryL":
                         goToFight("glunk");
                         break;
-                    case "glorkIdleL":
+                    case "glorkIdleR":
                         goToFight("glork");
                         break;
                 };
@@ -2364,7 +2365,7 @@ function tryOpenBoard() {
             temp.setData("defeated", true);
             temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
         };
-        temp=scene.add.sprite(256, 216, "glorkIdleL");
+        temp=scene.add.sprite(256, 214, "glorkIdleR");
         temp.setData("isBoardCharacter", true);
         temp.scale=2;
         if (beatenEnemies.includes("glork")) {
