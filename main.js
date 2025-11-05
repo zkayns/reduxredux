@@ -942,6 +942,7 @@ let boardUi;
 let boardOpen=false;
 let boardHoverEffect;
 let canMove=true;
+let canFightOmegaUFB=false;
 let playerTouchingBoard=false;
 let playerTouchingJim=false;
 let playerTouchingTomato=false;
@@ -1340,6 +1341,14 @@ GameScene.update=function(t) {
         temp=scene.physics.add.sprite(player.x, player.y, "devilR");
         temp.body.allowGravity=false;
     };
+    canFightOmegaUFB=(
+        beatenEnemies.includes("burgerBot")&&
+        beatenEnemies.includes("snowy")&&
+        beatenEnemies.includes("mustard")&&
+        beatenEnemies.includes("woozrd")&&
+        beatenEnemies.includes("brock")&&
+        beatenEnemies.includes("boulderBorg")&&
+        beatenEnemies.includes("dad"));
     canMove=!(jimOpen+transitioningIntoFight+boardOpen+dead+dialogOpen);
     player.setVelocityX((-bindIsDown(controls.player.moveLeft)*(playerSpeed+boughtShopItems.includes("shoes")*60)+bindIsDown(controls.player.moveRight)*(playerSpeed+boughtShopItems.includes("shoes")*60))*canMove);
     playerRect=player.getBounds();
@@ -1992,6 +2001,7 @@ GameScene.update=function(t) {
                             enemyState=0;
                             enemy.body.velocity.x=0;
                             enemy.setTexture(`glunkAnry${player.x>enemy.x?"R":"L"}`);
+                            enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
                             enemyData.groundHit=false;
                         };
                         break;
@@ -2014,6 +2024,7 @@ GameScene.update=function(t) {
                             enemyData.isDance=true;
                             enemyData.danceTimer=10000;
                             enemy.body.allowGravity=false;
+                            scene.cameras.main.shake(1000, .0125);
                             scene.time.delayedCall(2500, ()=>{
                                 enemy.x=player.x;
                                 enemyData.isDance=false;
@@ -2088,6 +2099,14 @@ GameScene.update=function(t) {
             };
             intersectedEnemyLastFrame=Phaser.Geom.Intersects.RectangleToRectangle(playerRect, enemy.getBounds());
             break;
+    };
+    if (scene.children.getByName("bgGradient")) { // PHASE 2 BG EFFECT
+        temp=scene.children.getByName("bgGradient");
+        temp.data.values.effect.size=Math.floor(Math.abs(Math.sin(t)*10));
+        temp.data.values.effect.fromX=Math.sin(t/500)+1;
+        temp.data.values.effect.fromY=Math.cos(t/500)+1;
+        temp.data.values.effect.toX=Math.cos(t/500)+1;
+        temp.data.values.effect.toY=Math.sin(t/500)+1;
     };
     player.setTexture(`onion${onionState}${onionFrame+1}`);
     gameFrame+=1;
@@ -2183,15 +2202,7 @@ function mouseDown(e) {
                         goToFight("dad");
                         break;
                     case "omegaUFB":
-                        if (!debug) {
-                            if (!beatenEnemies.includes("burgerBot")) break;
-                            if (!beatenEnemies.includes("snowy")) break;
-                            if (!beatenEnemies.includes("mustard")) break;
-                            if (!beatenEnemies.includes("woozrd")) break;
-                            if (!beatenEnemies.includes("brock")) break;
-                            if (!beatenEnemies.includes("boulderBorg")) break;
-                            if (!beatenEnemies.includes("dad")) break;
-                        };
+                        if (!debug&&!canFightOmegaUFB) break;
                         goToFight("omegaUFB");
                         break;
                     case "glunkAnryL":
@@ -2353,8 +2364,8 @@ function tryOpenBoard() {
         temp=scene.add.sprite(490, 344, "omegaUFB");
         temp.setData("isBoardCharacter", true);
         temp.scale=.5;
-        if (beatenEnemies.includes("omegaUFB")) {
-            temp.setData("defeated", true);
+        if (!canFightOmegaUFB) {
+            temp.setData("defeated", true); // this doesn't mean he's defeated, just means he should be treated the same on the board
             temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
         };
     } else { // PHASE 2 FIGHTS - BOARD
@@ -2542,6 +2553,8 @@ function goToFight(fight) {
                 hitRect: "",
                 groundHit: false
             };
+            enemy.body.width=enemy.getBounds().width/2;
+            enemy.body.height=enemy.getBounds().height/2;
             enemy.scale=2;
             enemy.y=ground.body.top-enemy.body.height;
             break;
@@ -2938,6 +2951,14 @@ function makePewPewer() {
 };
 function initPhase2() {
     phase2=true;
+    //scene.cameras.main.postFX.addVignette(.5, .5, .99, .3);
+    //scene.cameras.main.setBackgroundColor("#07030d");
+    temp=scene.add.sprite(scene.game.canvas.width/2, scene.game.canvas.height/2, "__WHITE");
+    temp.name="bgGradient";
+    temp.displayWidth=scene.game.canvas.width*2; 
+    temp.displayHeight=scene.game.canvas.height*2;
+    temp.depth=-1000;
+    temp.setData("effect", temp.postFX.addGradient(0x100000, 0x07030d, 0, 0, 0, 0, 1, 16));
     tomatoDialogOpts=[
         [
             "Sup, BO?",
@@ -2964,6 +2985,22 @@ function initPhase2() {
         [
             "Sup, BO?",
             "Our scientists have determined that there is a tear in the fabric of reality somewhere.",
+            "Stay safe, man."
+        ],
+        [
+            "Sup, BO?",
+            "Our scientists still haven't figured out why the cosmos appear to be folding in on themselves.",
+            "Stay safe, man."
+        ],
+        [
+            "Sup, BO?",
+            "The fundamental rules of reality still aren't working, and our scientists don't know why.",
+            "Stay safe, man."
+        ],
+        [
+            "Sup, BO?",
+            "Our scientists think an ancient being of great power may be responsible for the recent warping of reality.",
+            "The problem is, we don't know exactly what this being could be or what it wants.",
             "Stay safe, man."
         ]
     ];
