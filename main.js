@@ -2119,6 +2119,22 @@ GameScene.update=function(t) {
 function startGame() {
     scene.scene.start("GameScene");
 };
+function creditsClick(what) {
+    switch (what) {
+        case "phaser":
+            window.open("https://github.com/phaserjs/phaser", "_blank");
+            break;
+        case "zkayns":
+            window.open("https://github.com/zkayns/reduxredux", "_blank");
+            break;
+        case "jummbox":
+            window.open("https://jummb.us", "_blank");
+            break;
+        case "piranajoe":
+            window.open("https://www.youtube.com/@piranajoe1721");
+            break;
+    };
+};
 function startCredits() {
     inCredits=true;
     temp=scene.add.dom(0, 0, "div", "", "");
@@ -2127,12 +2143,12 @@ function startCredits() {
     temp.id="creditsText";
     temp.innerHTML+="<h1>Onion Quest Redux: <span class='rainbow'>Redux</span></h1>";
     temp.innerHTML+="<h3>A spinoff of Onion Quest Redux, made by ZProject</h3>";
-    temp.innerHTML+="<p>Code written by zkayns</p>";
-    temp.innerHTML+="<p>Original game series by PiranaJoe</p>";
+    temp.innerHTML+="<p>Game by <span class='creditsLink' onclick='creditsClick(`zkayns`)'>zkayns</span></p>";
+    temp.innerHTML+="<p>Original game series by <span class='creditsLink' onclick='creditsClick(`piranajoe`)'>PiranaJoe</span></p>";
     temp.innerHTML+="<p>Based off of a series of comics by Asher</p>";
-    temp.innerHTML+="<p>Music by zkayns</p>";
-    temp.innerHTML+="<p>Sprites by PiranaJoe, Vortex, and zkayns</p>";
-    temp.innerHTML+="<p>Made with the Phaser JavaScript game framework</p>";
+    temp.innerHTML+="<p>Music by <span class='creditsLink' onclick='creditsClick(`zkayns`)'>zkayns</span>, made with <span class='creditsLink' onclick='creditsClick(`jummbox`)'>JummBox</span></p>";
+    temp.innerHTML+="<p>Sprites by <span class='creditsLink' onclick='creditsClick(`piranajoe`)'>PiranaJoe</span>, Vortex, and <span class='creditsLink' onclick='creditsClick(`zkayns`)'>zkayns</span></p>";
+    temp.innerHTML+="<p>Made with the <span class='creditsLink' onclick='creditsClick(`phaser`)'>Phaser JavaScript framework</span></p>";
     document.getElementById("credits").appendChild(temp);
     temp=scene.add.dom(scene.game.canvas.width, 0, "button", "", "X");
     temp.node.id="leaveCreditsButton";
