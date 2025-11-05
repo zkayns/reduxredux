@@ -61,6 +61,12 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/Holy krab final.mp3"
     },
     {
+        name: "Glunk BGM",
+        audio: true,
+        id: "glunkBgm",
+        url: "https://zkayns.github.io/reduxredux/assets/The Glunk.mp3"
+    },
+    {
         name: "Da Jim BGM",
         audio: true,
         id: "jimJam",
@@ -826,6 +832,41 @@ let assetIndex=[
         id: "glunkSplosion",
         url: "https://zkayns.github.io/reduxredux/assets/glunkSplosion.png"
     },
+    {
+        name: "Glork Idle L",
+        id: "glorkIdleL",
+        url: "https://zkayns.github.io/reduxredux/assets/glorkIdleL.png"
+    },
+    {
+        name: "Glork Idle R",
+        id: "glorkIdleR",
+        url: "https://zkayns.github.io/reduxredux/assets/glorkIdleR.png"
+    },
+    {
+        name: "Glork Jump L",
+        id: "glunkJumpL",
+        url: "https://zkayns.github.io/reduxredux/assets/glorkJumpL.png"
+    },
+    {
+        name: "Glork Jump R",
+        id: "glorkJumpR",
+        url: "https://zkayns.github.io/reduxredux/assets/glorkJumpR.png"
+    },
+    {
+        name: "Glork Splosion",
+        id: "glorkSplosion",
+        url: "https://zkayns.github.io/reduxredux/assets/glorkSplosion.png"
+    },
+    {
+        name: "Glork Shockwave L",
+        id: "glorkShockwaveL",
+        url: "https://zkayns.github.io/reduxredux/assets/glorkShockwaveL.png"
+    },
+    {
+        name: "Glork Shockwave R",
+        id: "glorkShockwaveR",
+        url: "https://zkayns.github.io/reduxredux/assets/glorkShockwaveR.png"
+    },
 ];
 let phase2=false;
 let emitters={};
@@ -962,6 +1003,7 @@ let controls={
 let currentFight;
 let scene;
 let jumps=0;
+let intersectedEnemyLastFrame=false;
 let temp;
 let temp2;
 let debug=false;
@@ -1065,7 +1107,16 @@ let fights={
         startX: 512,
         startY: 344,
         startSpriteKey: "glunkSlep",
-        musicKey: "omegaUFBBgm"
+        musicKey: "glunkBgm"
+    },
+    glork: {
+        name: "Glork",
+        spriteTag: "glork",
+        hp: 15,
+        startX: 512,
+        startY: 344,
+        startSpriteKey: "glorkIdleL",
+        musicKey: "glunkBgm"
     }
 };
 let splashes=[
@@ -1944,11 +1995,74 @@ GameScene.update=function(t) {
                             enemyData.groundHit=false;
                         };
                         break;
+                    case "glork": // GLORK FIGHT
+                        if (!enemyDead&&enemyHp<=0) { // ON DEATH
+                            enemyDead=true;
+                            enemy.body.setEnable(false);
+                            enemy.depth=ground.depth+1;
+                            enemy.setTexture("glorkSplosion");
+                        };
+                        if (enemyDead) { // AFTER DEATH
+                            enemy.alpha=Math.max(enemy.alpha-.03, 0);
+                        };
+                        if (!enemyDead&&enemyState==0&&enemyActTimer>=1000) { // ON DIG
+                            enemyState=1;
+                            enemyActTimer=0;
+                            enemy.body.drag=1;
+                            enemy.body.velocity.y=30;
+                            scene.physics.world.removeCollider(enemyGroundCollider);
+                            enemyData.isDance=true;
+                            enemy.body.allowGravity=false;
+                            scene.time.delayedCall(2500, ()=>{
+                                enemy.x=player.x;
+                                enemyData.isDance=false;
+                                enemy.body.velocity.y=-400;
+                                enemy.body.allowGravity=true;
+                                enemy.setTexture(`glorkJump${player.x<enemy.x?"L":"R"}`);
+                                scene.time.delayedCall(1000, ()=>{
+                                    enemyGroundCollider=scene.physics.add.collider(enemy, ground);
+                                    enemyData.shouldGroundCheck=true;
+                                });
+                            });
+                        };
+                        if (!enemyDead&&enemyState==1&&enemyData.shouldGroundCheck&&enemy.body.bottom>=ground.body.top) { // ON LAND
+                            enemyState=0;
+                            enemyData.shouldGroundCheck=false;
+                            enemy.setTexture(`glorkIdle${player.x<enemy.x?"L":"R"}`);
+                            enemyData.danceDir=player.x<enemy.x?"L":"R";
+                            enemyActTimer=0;
+                            temp=scene.physics.add.sprite(enemy.x, enemy.y, "glorkShockwaveL");
+                            temp.depth=ground.depth-1;
+                            temp.scale=2;
+                            temp.y=ground.body.top-temp.body.height/2;
+                            temp.body.allowGravity=false;
+                            temp.body.drag=1;
+                            temp.body.velocity.x=-200;
+                            temp=scene.physics.add.sprite(enemy.x, enemy.y, "glorkShockwaveR");
+                            temp.depth=ground.depth-1;
+                            temp.scale=2;
+                            temp.y=ground.body.top-temp.body.height/2;
+                            temp.body.allowGravity=false;
+                            temp.body.drag=1;
+                            temp.body.velocity.x=200;
+                        };
+                        if (enemyData.isDance) { // GLORK DANCE ANIM
+                            if (enemyData.danceTimer>=333) {
+                                enemyData.danceTimer=0;
+                                enemyData.danceDir=swapDir(enemyData.danceDir);
+                                enemy.setTexture(`glorkIdle${enemyData.danceDir}`);
+                            };
+                            enemyData.danceTimer+=t-lastT;
+                        };
+                        if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, enemy.getBounds())&&!intersectedEnemyLastFrame) { // ON INTERSECT GLORK
+                            playerHit();
+                        };
+                        break;
                 };
-            } else { // OTHER STUFF, ALSO RUNS DURiNG TRANSITION
+            } else { // OTHER STUFF, RUNS DURING TRANSITION
                 switch (currentFight) {
                     case "glunk":
-                        if (enemyData.isSlep) {
+                        if (enemyData.isSlep) { // GLUNK SLEEP ANIM
                             if (enemyData.slepTimer>=1000) {
                                 enemyData.slepString=enemyData.slepString==""?"2":"";
                                 enemyData.slepTimer=0;
@@ -1959,8 +2073,19 @@ GameScene.update=function(t) {
                             enemyData.slepTimer+=t-lastT;
                         };
                         break;
+                    case "glork":
+                        if (enemyData.isDance) { // GLORK DANCE ANIM
+                            if (enemyData.danceTimer>=333) {
+                                enemyData.danceTimer=0;
+                                enemyData.danceDir=swapDir(enemyData.danceDir);
+                                enemy.setTexture(`glorkIdle${enemyData.danceDir}`);
+                            };
+                            enemyData.danceTimer+=t-lastT;
+                        };
+                        break;
                 };
             };
+            intersectedEnemyLastFrame=Phaser.Geom.Intersects.RectangleToRectangle(playerRect, enemy.getBounds());
             break;
     };
     player.setTexture(`onion${onionState}${onionFrame+1}`);
@@ -2070,6 +2195,9 @@ function mouseDown(e) {
                         break;
                     case "glunkAnryL":
                         goToFight("glunk");
+                        break;
+                    case "glorkIdleL":
+                        goToFight("glork");
                         break;
                 };
             }; 
@@ -2233,6 +2361,13 @@ function tryOpenBoard() {
         temp.setData("isBoardCharacter", true);
         temp.scale=2;
         if (beatenEnemies.includes("glunk")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
+        temp=scene.add.sprite(256, 216, "glorkIdleL");
+        temp.setData("isBoardCharacter", true);
+        temp.scale=2;
+        if (beatenEnemies.includes("glork")) {
             temp.setData("defeated", true);
             temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
         };
@@ -2409,6 +2544,17 @@ function goToFight(fight) {
             enemy.scale=2;
             enemy.y=ground.body.top-enemy.body.height;
             break;
+        case "glork":
+            enemyData={
+                isDance: true,
+                danceTimer: 500,
+                danceDir: "L",
+                shouldGroundCheck: false
+            };
+            enemy.depth=ground.depth-1;
+            enemy.scale=2;
+            enemy.y=ground.body.top-enemy.body.height;
+            break;
     };
     enemyGroundCollider=scene.physics.add.collider(enemy, ground);
     scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
@@ -2513,6 +2659,14 @@ function initFight() {
                     enemyActTimer=1000;
                     endFightInit();
                 });
+            });
+            break;
+        case "glork":
+            enemyData.isDance=false;
+            enemy.setTexture("glorkIdleL");
+            scene.time.delayedCall(1000, ()=>{
+                enemyActTimer=1000;
+                endFightInit();
             });
             break;
     };
@@ -2668,7 +2822,7 @@ function isEnemyProjectile(o) {
     return keyTagged(o, "mustardProjectile")||keyTagged(o, "laser")||keyTagged(o, "magicBall")||keyTagged(o, "pewPew", 6)||keyTagged(o, "zap");
 };
 function isEnemyShockwave(o) {
-    return keyTagged(o, "roboShockwave")||keyTagged(o, "boulderBorgShockwave")||keyTagged(o, "dadShockwave");
+    return keyTagged(o, "roboShockwave")||keyTagged(o, "boulderBorgShockwave")||keyTagged(o, "dadShockwave")||keyTagged(o, "glorkShockwave");
 };
 function getType(thing) {
     switch (thing) {
