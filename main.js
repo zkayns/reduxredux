@@ -2966,6 +2966,7 @@ function makePewPewer() {
     temp.scale=1.5;
 };
 function initPhase2() {
+    if (phase2) return false;
     phase2=true;
     //scene.cameras.main.postFX.addVignette(.5, .5, .99, .3);
     //scene.cameras.main.setBackgroundColor("#07030d");
