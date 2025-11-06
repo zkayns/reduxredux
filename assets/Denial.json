@@ -26,7 +26,7 @@
 			"instruments": [
 				{
 					"type": "Picked String",
-					"volume": -20,
+					"volume": -25,
 					"eqFilter": [
 						{
 							"type": "high-pass",
