@@ -139,6 +139,11 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/shoes.png"
     },
     {
+        name: "Ancient Runes",
+        id: "runes",
+        url: "https://zkayns.github.io/reduxredux/assets/runes.png"
+    },
+    {
         name: "Soder",
         id: "soder",
         url: "https://zkayns.github.io/reduxredux/assets/soder.png"
@@ -197,6 +202,11 @@ let assetIndex=[
         name: "Devil Book",
         id: "devilBook",
         url: "https://zkayns.github.io/reduxredux/assets/devilBook.png"
+    },
+    {
+        name: "Gold Ring",
+        id: "goldRing",
+        url: "https://zkayns.github.io/reduxredux/assets/goldRing.png"
     },
     {
         name: "Onion Coin",
@@ -950,6 +960,7 @@ let tomatoDialogOpts=[
 ];
 let onionFrame=1;
 let onionState="IdleR";
+let nullified=false;
 let charmCooldown=1000;
 let transitioningIntoFight=false;
 let sinceLastCharm=charmCooldown;
@@ -1245,6 +1256,18 @@ let shopItems={
         description: "Makes your attacks faster and adds devil nuts at the cost of 3 HP cap",
         cost: 3,
         requires: ["hyperSlam", "hyperCharm", "hyperShield"]
+    },
+    runes: {
+        name: "Ancient Runes",
+        spriteKey: "runes",
+        description: "Nullifies the first hit of every fight",
+        cost: 3
+    },
+    goldRing: {
+        name: "Gold Ring",
+        spriteKey: "goldRing",
+        description: "Gives you 1 extra money after beating an enemy",
+        cost: 4
     }
 };
 let config={
@@ -2527,6 +2550,7 @@ function goToFight(fight) {
     scene.children.getByName("finaleNote")?.destroy();
     scene.children.getByName("tomato")?.destroy();
     damageTaken=false;
+    nullified=false;
     boardOpen=false;
     transitioningIntoFight=true;
     onionLanded=false;
@@ -2774,6 +2798,7 @@ function leaveFight() {
         coins+=scene.children.getByName("coin").texture.key.includes("ring")+1;
         scene.children.getByName("coin").destroy();
     };
+    if (boughtShopItems.includes("goldRing")) coins++;
     scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
 };
 function loadGameAssets() {
@@ -2816,6 +2841,10 @@ function keyTagged(o, k, len) {
     return o.texture?.key?.slice(0, k.length)==k&&o.texture?.key?.length<=(len||Infinity);
 };
 function playerHit() {
+    if (nullified==false&&boughtShopItems.includes("runes")) {
+        nullified=true;
+        return false;
+    };
     damageTaken=true;
     hp--;
     lastPlayerHit=T;
