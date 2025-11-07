@@ -79,6 +79,18 @@ let assetIndex=[
         url: "https://zkayns.github.io/reduxredux/assets/jimJam.mp3"
     },
     {
+        name: "Bled Dry",
+        audio: true,
+        id: "bledDry",
+        url: "https://zkayns.github.io/reduxredux/assets/Bled dry.mp3"
+    },
+    {
+        name: "Denial",
+        audio: true,
+        id: "denial",
+        url: "https://zkayns.github.io/reduxredux/assets/Denial.mp3"
+    },
+    {
         name: "Town Board",
         id: "townBoard",
         url: "https://zkayns.github.io/reduxredux/assets/Sign.png"
@@ -893,6 +905,11 @@ let assetIndex=[
         id: "glorkShockwaveR",
         url: "https://zkayns.github.io/reduxredux/assets/glorkShockwaveR.png"
     },
+    {
+        name: "Him",
+        id: "him",
+        url: "https://zkayns.github.io/reduxredux/assets/him.png"
+    }
 ];
 let phase2=false;
 let emitters={};
@@ -958,6 +975,20 @@ let tomatoDialogOpts=[
         "I mean, I'm glad he's gone, it just seems kind of weird that we haven't seen him in a while."
     ]
 ];
+let himDialog=[
+    "Big Onion.",
+    "The so-called protector of this here rural town.",
+    "Boulder Borg, Burger Bot, Glork.",
+    "You have defeated many of my finest creations.",
+    "But alas, it doesn't matter.",
+    "You may think yourself to be the most powerful vegetable of all time...",
+    "But no matter how jacked you may be, in comparison to me, you are nothing.",
+    "I have been watching.",
+    "Waiting.",
+    "Plotting.",
+    "You have done well, Big Onion.",
+    "But now... it is time to meet your maker."
+];
 let onionFrame=1;
 let onionState="IdleR";
 let nullified=false;
@@ -983,6 +1014,7 @@ let enemyDead=false;
 let dialogOpen=false;
 let damageTaken=false;
 let coins=0;
+let talkingToHim=false;
 let shieldUp=false;
 let shieldDuration=1000;
 let shieldCooldown=3000;
@@ -995,6 +1027,7 @@ let sinceLastSlam=slamCooldown;
 let daJim;
 let jimOpen=false;
 let enemyData;
+let himMatrix;
 let boughtShopItems=new Array();
 let physics={
     default: 'arcade',
@@ -1024,7 +1057,9 @@ let controls={
         toggleDebug: ["-"],
         debug: {
             initPhase2: ["="],
-            bigMoney: [";"]
+            bigMoney: [";"],
+            //him: ["H"],
+            killEnemy: ["k"]
         }
     }
 };
@@ -1045,6 +1080,7 @@ let hitEffect;
 let playerHitEffect;
 let devilCreated=false;
 let beatenEnemies=new Array();
+let cutsceneSkip=true;
 let MainMenuScene={
     key: "MainMenuScene",
     physics: physics,
@@ -1145,6 +1181,15 @@ let fights={
         startY: 344,
         startSpriteKey: "glorkIdleL",
         musicKey: "glorkBgm"
+    },
+    him: {
+        name: "Him",
+        spriteTag: "him",
+        hp: 100,
+        startX: 320,
+        startY: 240,
+        startSpriteKey: "him",
+        musicKey: "denial"
     }
 };
 let splashes=[
@@ -1171,7 +1216,7 @@ let shopItems={
     capLife: {
         name: "Cap Life",
         spriteKey: "capLife",
-        description: "Makes you not die by adding 1 to your HP cap. Caps at 15",
+        description: "Makes you not die by adding 1 to your HP cap. Caps at 20",
         cost: 2,
         rebuyable: true
     },
@@ -1348,6 +1393,12 @@ GameScene.preload=function() {
         pixelHeight: 4,
         palette: {"a": "#FF00D4"}
     });
+    scene.textures.generate(`himShot`, {
+        data: ["a"],
+        pixelWidth: 16,
+        pixelHeigth: 16,
+        palette: {"a": "#FFFFFF"}
+    });
     scene.input.keyboard.on("keydown", keyDown);
     scene.input.keyboard.on("keyup", keyUp);
     scene.input.on("pointermove", mouseMove);
@@ -1403,7 +1454,7 @@ GameScene.update=function(t) {
             i.style["filter"]=shopItems[i.id.split("_")[1]]?.unbuyable?"brightness(50%)":"";
             shopItems[i.id.split("_")[1]].requires?.map(requiredItem=>boughtShopItems.includes(requiredItem)).forEach(a=>!a?i.style["filter"]="brightness(50%)":"");
             shopItems["extraLife"].unbuyable=hp>=maxHp;
-            shopItems["capLife"].unbuyable=maxHp>=15;
+            shopItems["capLife"].unbuyable=maxHp>=20;
             if (boughtShopItems.includes(i.id.split("_")[1])) i.remove();
         });
         document.querySelectorAll(".jimItemContainer:hover").forEach(i=>{
@@ -1417,7 +1468,7 @@ GameScene.update=function(t) {
         player.rotation=0;
         enemy.rotation*=!currentFight=="snowy"
         player.setCollideWorldBounds(true);
-        scene.cameras.main.shake(750, .05, false, (cam, prog)=>{prog>=1?initFight():""});
+        if (currentFight!="him") scene.cameras.main.shake(750, .05, false, (cam, prog)=>{prog>=1?initFight():""});
         onionLanded=true;
     } else if (transitioningIntoFight&&!onionLanded) {
         player.rotation+=1;
@@ -1525,6 +1576,16 @@ GameScene.update=function(t) {
         shieldCheck(zap);
         offscreenCheck(zap);
     });
+    scene.children.list.filter(obj=>keyTagged(obj, "himShot")).forEach(himShot=>{
+        himShot.scale=Math.sin(t/100)/2+1;
+        if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, himShot.getBounds())) {
+            playerHit();
+            himShot.destroy();
+        };
+        shieldCheck(himShot);
+        offscreenCheck(himShot);
+        if (gameFrame%2==0) himShot.tint=himShot.tint==0xff0000?0xff00ff:0xff0000;
+    });
     if (onionState.slice(0,4)=="Idle") {
         if (gameFrame%30==0) onionFrame++;
         onionFrame=onionFrame%2;
@@ -1569,6 +1630,14 @@ GameScene.update=function(t) {
         temp.y=ground.body.top-temp.body.height/1.333;
         scene.physics.add.collider(ground, temp);
     };
+    if (himMatrix&&!talkingToHim) {
+        himMatrix.alpha-=.0166667;
+        if (himMatrix.alpha<=0) {
+            scene.cameras.main.postFX.remove(himMatrix);
+            himMatrix="";
+            endFightInit();
+        };
+    };
     if (playerHitEffect&&t-lastPlayerHit>200) player.postFX.remove(playerHitEffect);
     switch (onionLocation) {
         case "town":
@@ -1600,15 +1669,18 @@ GameScene.update=function(t) {
             break;
         default:
             if (!transitioningIntoFight&&enemyHp>0&&!dead) {
-                document.getElementById("enemyHealthBar").innerHTML=`[${"|".repeat(Math.max(enemyHp, 1))}<span style='color: black'>${"|".repeat(Math.max(fights[currentFight].hp-enemyHp, 0))}</span>]`;
+                document.getElementById("enemyHealthBar").innerHTML=currentFight=="him"?`[${enemyHp}]`:`[${"|".repeat(Math.max(enemyHp, 1))}<span style='color: black'>${"|".repeat(Math.max(fights[currentFight].hp-enemyHp, 0))}</span>]`;
                 document.getElementById("onionHealthBar").innerHTML=`[${"|".repeat(Math.max(hp, 1))}<span style='color: black'>${"|".repeat(Math.max(maxHp-hp, 0))}</span>]`;
             };
             if (currentFight=="woozrd"&&enemyData?.fadingIn&&transitioningIntoFight) enemy.alpha+=.03;
             if (hitEffect&&t-lastHit>200) enemy.postFX.remove(hitEffect);
+            playerTouchingBoard=false;
+            playerTouchingJim=false;
+            playerTouchingTomato=false;
             if (!transitioningIntoFight) { // IF CURRENTLY FIGHTING
                 enemyActTimer+=t-lastT;
                 if (enemyDead&&document.getElementById("enemyUi")) { // ON DEATH, REGARDLESS OF ENEMY
-                    dropCoin();
+                    if (currentFight!="him") dropCoin();
                     music.stop();
                     document.getElementById("enemyUi").remove();
                     document.getElementById("onionUi").remove();
@@ -2117,6 +2189,51 @@ GameScene.update=function(t) {
                             playerHit();
                         };
                         break;
+                    case "him": // HIM FIGHT
+                        if (enemyHp<=0&&!enemyDead) {
+                            enemyDead=true;
+                            showDialog("ENOUGH.");
+                            enemy.alpha=1;
+                            scene.cameras.main.shake(1500, .25, false, (cam, prog)=>{
+                                temp=gameFrame%2?"#FF00FF":"#FF0000";
+                                document.getElementById("dialog").style["color"]=temp;
+                                document.getElementById("dialog").style["border"]=`1px solid ${temp}`;
+                                if (prog>=1) {
+                                    enemy.alpha=0;
+                                    enemy.body.setEnable(false);
+                                    scene.children.getByName("bgGradient").destroy();
+                                    closeDialog();
+                                    scene.cameras.main.flash(1500, 255, 0, 0);
+                                    scene.cameras.main.postFX.clear();
+                                    ground.alpha=1;
+                                };
+                            });
+                        };
+                        if (!enemyDead) { // DURING FIGHT
+                            enemy.alpha=Math.max(enemy.alpha-.03, 0);
+                            if (enemy.alpha<=0) enemy.body.setEnable(false);
+                            temp=["#ff0000", "#ff00ff"][gameFrame%2];
+                            document.getElementById("enemyName").style["color"]=document.getElementById("enemyHealthBar").style["color"]=temp;
+                            document.getElementById("enemyUi").style["border"]=`1px solid ${temp}`;
+                        };
+                        if (!enemyDead&&enemyState==0&&enemyActTimer>=1000-(100-enemyHp)*3) { // ON TELEPORT
+                            enemy.body.setEnable(true);
+                            temp=Phaser.Math.Angle.BetweenPoints(enemy, player);
+                            enemy.x=Math.random()*scene.game.canvas.width;
+                            enemy.y=Math.random()*(scene.game.canvas.height-280)+60;
+                            enemy.alpha=1;
+                            enemyActTimer=0;
+                            makeHimShot(0, -1, enemy);
+                            makeHimShot(1, -1, enemy);
+                            makeHimShot(1, 0, enemy);
+                            makeHimShot(1, 1, enemy);
+                            makeHimShot(0, 1, enemy);
+                            makeHimShot(-1, 1, enemy);
+                            makeHimShot(-1, 0, enemy);
+                            makeHimShot(-1, -1, enemy);
+                            scene.cameras.main.flash(250, 255, 0, 255*(Math.random()>.5));
+                        };
+                        break;
                 };
             } else { // OTHER STUFF, RUNS DURING TRANSITION
                 switch (currentFight) {
@@ -2223,7 +2340,7 @@ function keyDown(e) {
     (boardOpen||playerTouchingBoard)&&controls.player.interact.includes(e.key)?tryOpenBoard():"";
     (playerTouchingJim||jimOpen)&&controls.player.interact.includes(e.key)?tryOpenJim():"";
     ((playerTouchingTomato&&!playerTouchingJim)||talkingToTomato)&&controls.player.interact.includes(e.key)?tryTomato():"";
-    dialogOpen&&controls.player.exit.includes(e.key)?stopDialog():"";
+    dialogOpen&&!talkingToHim&&controls.player.exit.includes(e.key)?stopDialog():"";
     jimOpen&&controls.player.exit.includes(e.key)?tryOpenJim():"";
     boardOpen&&controls.player.exit.includes(e.key)?tryOpenBoard():"";
     controls.game.screenshot.includes(e.key)?takeScreenshot():"";
@@ -2231,6 +2348,8 @@ function keyDown(e) {
     if (debug) {
         controls.game.debug.initPhase2.includes(e.key)?initPhase2():"";
         controls.game.debug.bigMoney.includes(e.key)?coins=10000:"";
+        //controls.game.debug.him.includes(e.key)?goToFight("him"):"";
+        controls.game.debug.killEnemy.includes(e.key)?enemyHp=0:"";
     };
 };
 function keyUp(e) {
@@ -2497,7 +2616,7 @@ function tryOpenJim() {
                         hp=Math.min(hp+3, maxHp);
                         break;
                     case "capLife":
-                        maxHp=Math.min(maxHp+1, 15);
+                        maxHp=Math.min(maxHp+1, 20);
                         hp=Math.min(hp+1, maxHp);
                         break;
                     case "inrg":
@@ -2640,6 +2759,21 @@ function goToFight(fight) {
             enemy.scale=2;
             enemy.y=ground.body.top-enemy.body.height;
             break;
+        case "him":
+            enemy.body.allowGravity=false;
+            enemy.scale=.25;
+            ground.alpha=0;
+            scene.cameras.main.postFX.addVignette(.5, .5, .99);
+            if (!cutsceneSkip) {
+                music=scene.sound.add("bledDry");
+                music.play();
+                doHimDialog();
+            } else {
+                initFight();
+                transitioningIntoFight=false;
+                endFightInit();
+            };
+            break;
     };
     enemyGroundCollider=scene.physics.add.collider(enemy, ground);
     scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
@@ -2753,6 +2887,16 @@ function initFight() {
                 enemyActTimer=1000;
                 endFightInit();
             });
+            break;
+        case "him":
+            scene.physics.world.removeCollider(enemyGroundCollider);
+            enemy.body.drag=0.01;
+            player.setCollideWorldBounds(true);
+            // 0x100000, 0x07030d
+            if (scene.children.getByName("bgGradient")) {
+                scene.children.getByName("bgGradient").data.values.effect.color1=0x300000;
+                scene.children.getByName("bgGradient").data.values.effect.color2=0x27232d;
+            };
             break;
     };
 };
@@ -2952,6 +3096,27 @@ function tryTomato() {
         showDialog(tomatoDialog[currentDialog]);
     };
 };
+function doHimDialog() {
+    if (!cutsceneSkip) {
+        talkingToHim=true;
+        himMatrix=scene.cameras.main.postFX.addColorMatrix().brightness(0);
+        for (let i in himDialog) {
+            scene.time.delayedCall(i*2900, ()=>{
+                showDialog(himDialog[i]);
+                document.querySelector("#dialog").style["color"]="#FF0000";
+                document.querySelector("#dialog").style["border"]="1px solid #FF0000";
+            });
+        };
+        scene.time.delayedCall((himDialog.length+2)*2900, ()=>{
+            closeDialog();
+            talkingToHim=false;
+            initFight();
+    });
+    } else {
+        scene.sound.stopAll();
+        endFightInit();
+    };
+};
 function showDialog(text) {
     dialogOpen=true;
     document.getElementById("dialog")?.remove();
@@ -3081,6 +3246,14 @@ function initPhase2() {
             "Stay safe, man."
         ]
     ];
+};
+function makeHimShot(xdir, ydir, at) {
+    temp=scene.physics.add.sprite(at.x, at.y, "himShot");
+    temp.body.allowGravity=false;
+    temp.body.velocity.x=300*xdir;
+    temp.body.velocity.y=300*ydir;
+    temp.tintFill=true;
+    temp.tint=0xff0000;
 };
 function hitCheck(thing1, thing2) {
     return Phaser.Geom.Intersects.RectangleToRectangle(thing1, thing2);
