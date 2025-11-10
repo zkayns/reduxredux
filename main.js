@@ -1485,14 +1485,15 @@ GameScene.update=function(t) {
         temp=scene.physics.add.sprite(player.x, player.y, "devilR");
         temp.body.allowGravity=false;
     };
-    canFightOmegaUFB=(
-        beatenEnemies.includes("burgerBot")&&
-        beatenEnemies.includes("snowy")&&
-        beatenEnemies.includes("mustard")&&
-        beatenEnemies.includes("woozrd")&&
-        beatenEnemies.includes("brock")&&
-        beatenEnemies.includes("boulderBorg")&&
-        beatenEnemies.includes("dad"));
+    canFightOmegaUFB=[
+        beatenEnemies.includes("burgerBot"),
+        beatenEnemies.includes("snowy"),
+        beatenEnemies.includes("mustard"),
+        beatenEnemies.includes("woozrd"),
+        beatenEnemies.includes("brock"),
+        beatenEnemies.includes("boulderBorg"),
+        beatenEnemies.includes("dad")
+    ].every(i=>i);
     canMove=!(jimOpen+transitioningIntoFight+boardOpen+dead+dialogOpen);
     player.setVelocityX((-bindIsDown(controls.player.moveLeft)*(playerSpeed+boughtShopItems.includes("shoes")*60)+bindIsDown(controls.player.moveRight)*(playerSpeed+boughtShopItems.includes("shoes")*60))*canMove);
     playerRect=player.getBounds();
@@ -2262,6 +2263,9 @@ GameScene.update=function(t) {
                     case "toast": // TOAST FIGHT
                         if (!enemyDead&&enemyHp<=0) { // ON DEATH
                             enemyDead=true;
+                            enemy.body.velocity.x=0;
+                            enemy.body.velocity.y=0;
+                            enemy.body.allowGravity=true;
                             enemy.setTexture("toastWoah");
                         };
                         if (!enemyDead&&enemyState==0) {
@@ -2885,6 +2889,7 @@ function goToFight(fight) {
             enemy.scale=2;
             enemy.y=ground.body.top-enemy.body.height;
             enemy.body.allowGravity=false;
+            enemy.depth=ground.depth+2;
             break;
         case "him":
             enemy.body.allowGravity=false;
@@ -3178,32 +3183,60 @@ function die() {
 };
 function shouldDespawn(o) {
     // any game object matching any of the conditions in the array will be destroyed upon onion entering/leaving a fight
-    return !![
+    return [
         isCharm(o),
         isPlayerShockwave(o),
         isCharisma(o),
         isEnemyProjectile(o),
         isEnemyShockwave(o),
         keyTagged(o, "flash")
-    ].filter(i=>!!i).length;
+    ].some(i=>i);
 };
 function isCharm(o) {
-    return keyTagged(o, "charm")||keyTagged(o, "hyperCharm")||keyTagged(o, "devilCharm")||keyTagged(o, "devilNut");
+    return [
+        keyTagged(o, "charm"),
+        keyTagged(o, "hyperCharm"),
+        keyTagged(o, "devilCharm"),
+        keyTagged(o, "devilNut")
+    ].some(i=>i);
 };
 function isCharisma(o) {
-    return keyTagged(o, "charisma")||keyTagged(o, "hyperCharisma");
+    return [
+        keyTagged(o, "charisma"),
+        keyTagged(o, "hyperCharisma")
+    ].some(i=>i);
 };
 function isShield(o) {
-    return keyTagged(o, "shield")||keyTagged(o, "hyperShield")||keyTagged(o, "devilShield");
+    return [
+        keyTagged(o, "shield"),
+        keyTagged(o, "hyperShield"),
+        keyTagged(o, "devilShield")
+    ].some(i=>i);
 };
 function isPlayerShockwave(o) {
-    return keyTagged(o, "shockwave")||keyTagged(o, "hyperShockwave")||keyTagged(o, "devilShockwave");
+    return [
+        keyTagged(o, "shockwave"),
+        keyTagged(o, "hyperShockwave"),
+        keyTagged(o, "devilShockwave")
+    ].some(i=>i);
 };
 function isEnemyProjectile(o) {
-    return keyTagged(o, "mustardProjectile")||keyTagged(o, "laser")||keyTagged(o, "magicBall")||keyTagged(o, "pewPew", 6)||keyTagged(o, "zap");
+    return [
+        keyTagged(o, "mustardProjectile"),
+        keyTagged(o, "laser"),
+        keyTagged(o, "magicBall"),
+        keyTagged(o, "pewPew", 6),
+        keyTagged(o, "zap"),
+        keyTagged(o, "toastProjectile")
+    ].some(i=>i);
 };
 function isEnemyShockwave(o) {
-    return keyTagged(o, "roboShockwave")||keyTagged(o, "boulderBorgShockwave")||keyTagged(o, "dadShockwave")||keyTagged(o, "glorkShockwave");
+    return [
+        keyTagged(o, "roboShockwave"),
+        keyTagged(o, "boulderBorgShockwave"),
+        keyTagged(o, "dadShockwave"),
+        keyTagged(o, "glorkShockwave")
+    ].some(i=>i);
 };
 function getType(thing) {
     switch (thing) {
