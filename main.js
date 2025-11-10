@@ -1610,7 +1610,7 @@ GameScene.update=function(t) {
             pewPewer.rotation=Phaser.Math.Angle.BetweenPoints(pewPewer, player);
             pewPewer.x=enemy.x;
             pewPewer.y=enemy.y+enemy.height/1.25;
-        } else if (!transitioningIntoFight) {
+        } else {
             pewPewer.destroy();
         };
     });
@@ -2793,6 +2793,7 @@ function goToFight(fight) {
     onionLanded=false;
     currentFight=fight;
     enemyFrame=1;
+    enemyDead=false;
     onionLocation=`enemy_${fight}`;
     player.setCollideWorldBounds(false);
     player.x=player.body.width;
