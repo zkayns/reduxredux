@@ -1533,6 +1533,7 @@ GameScene.update=function(t) {
         scene.physics.overlap(charm, enemy, ()=>{
             charm.destroy();
             enemyHit(t);
+            return false;
         }); 
         offscreenCheck(charm);
     });
@@ -1540,6 +1541,7 @@ GameScene.update=function(t) {
         if (Phaser.Geom.Intersects.RectangleToRectangle(charisma.getBounds(), playerRect)) {
             charisma.destroy();
             playerHit();
+            return false;
         };
         shieldCheck(charisma);
         offscreenCheck(charisma);
@@ -1548,6 +1550,7 @@ GameScene.update=function(t) {
         scene.physics.overlap(shockwave, enemy, ()=>{
             shockwave.destroy();
             enemyHit(t);
+            return false;
         });
         offscreenCheck(shockwave);
     });
@@ -1555,6 +1558,7 @@ GameScene.update=function(t) {
         if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, enemyShockwave.getBounds())) {
             enemyShockwave.destroy();
             playerHit();
+            return false;
         };
         shieldCheck(enemyShockwave);
         offscreenCheck(enemyShockwave);
@@ -1579,6 +1583,7 @@ GameScene.update=function(t) {
             if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, laser.getBounds())) {
                 laser.destroy();
                 playerHit();
+                return false;
             };
             shieldCheck(laser);
         };
@@ -1589,6 +1594,7 @@ GameScene.update=function(t) {
         if (!mustard.getData("hitPlayer")&&Phaser.Geom.Intersects.RectangleToRectangle(playerRect, mustard.getBounds())) {
             playerHit();
             mustard.setData("hitPlayer", true);
+            return false;
         };
         if (mustard.scale<=0) mustard.destroy();
         shieldCheck(mustard);
@@ -1597,6 +1603,7 @@ GameScene.update=function(t) {
         if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, magicBall.getBounds())) {
             playerHit();
             destroyMagicBall(magicBall);
+            return false;
         };
         scene.children.list.filter(obj=>isShield(obj)).forEach(shield=>{scene.physics.overlap(magicBall, shield, ()=>{destroyMagicBall(magicBall)})});
         magicBall?.body?.left>scene.game.canvas.width||magicBall?.body?.right<0?destroyMagicBall(magicBall):"";
@@ -1619,6 +1626,7 @@ GameScene.update=function(t) {
         if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, pewPew.getBounds())) {
             playerHit();
             pewPew.destroy();
+            return false;
         };
         shieldCheck(pewPew);
         offscreenCheck(pewPew);
@@ -1627,6 +1635,7 @@ GameScene.update=function(t) {
         if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, zap.getBounds())) {
             playerHit();
             zap.destroy();
+            return false;
         };
         shieldCheck(zap);
         offscreenCheck(zap);
@@ -1636,12 +1645,18 @@ GameScene.update=function(t) {
         if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, himShot.getBounds())) {
             playerHit();
             himShot.destroy();
+            return false;
         };
         shieldCheck(himShot);
         offscreenCheck(himShot);
         if (gameFrame%2==0) himShot.tint=himShot.tint==0xff0000?0xff00ff:0xff0000;
     });
     scene.children.list.filter(obj=>keyTagged(obj, "toastProjectile")).forEach(toast=>{
+        if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, toast.getBounds())) {
+            playerHit();
+            toast.destroy();
+            return false;
+        };
         toast.data.values.timer+=T-lastT;
         if (toast.data.values.timer>=500) {
             toast.setData("timer", 0);
