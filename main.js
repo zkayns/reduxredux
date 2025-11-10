@@ -909,7 +909,52 @@ let assetIndex=[
         name: "Him",
         id: "him",
         url: "https://zkayns.github.io/reduxredux/assets/him.png"
-    }
+    },
+    {
+        name: "Toast Idle 1",
+        id: "toastIdle1",
+        url: "https://zkayns.github.io/reduxredux/assets/toastIdle1.png"
+    },
+    {
+        name: "Toast Idle 2",
+        id: "toastIdle2",
+        url: "https://zkayns.github.io/reduxredux/assets/toastIdle2.png"
+    },
+    {
+        name: "Toast Chargin 1",
+        id: "toastAtk1",
+        url: "https://zkayns.github.io/reduxredux/assets/toastAtk1.png"
+    },
+    {
+        name: "Toast Chargin 2",
+        id: "toastAtk2",
+        url: "https://zkayns.github.io/reduxredux/assets/toastAtk2.png"
+    },
+    {
+        name: "Toast Chargin 3",
+        id: "toastAtk3",
+        url: "https://zkayns.github.io/reduxredux/assets/toastAtk3.png"
+    },
+    {
+        name: "Toast Woah",
+        id: "toastWoah",
+        url: "https://zkayns.github.io/reduxredux/assets/toastWoah.png"
+    },
+    {
+        name: "Toast Projectile",
+        id: "toastProjectile",
+        url: "https://zkayns.github.io/reduxredux/assets/toastProjectile.png"
+    },
+    {
+        name: "Toast Projectile Toasted",
+        id: "toastProjectileToasted",
+        url: "https://zkayns.github.io/reduxredux/assets/toastProjectileToasted.png"
+    },
+    {
+        name: "Toast Projectile Burnt",
+        id: "toastProjectileBurnt",
+        url: "https://zkayns.github.io/reduxredux/assets/toastProjectileBurnt.png"
+    },
 ];
 let phase2=false;
 let emitters={};
@@ -1180,6 +1225,15 @@ let fights={
         startX: 512,
         startY: 344,
         startSpriteKey: "glorkIdleL",
+        musicKey: "glorkBgm"
+    },
+    toast: {
+        name: "Toast",
+        spriteTag: "toast",
+        hp: 20,
+        startX: 512,
+        startY: 344,
+        startSpriteKey: "toastIdle1",
         musicKey: "glorkBgm"
     },
     him: {
@@ -1556,7 +1610,7 @@ GameScene.update=function(t) {
             pewPewer.rotation=Phaser.Math.Angle.BetweenPoints(pewPewer, player);
             pewPewer.x=enemy.x;
             pewPewer.y=enemy.y+enemy.height/1.25;
-        } else {
+        } else if (!transitioningIntoFight) {
             pewPewer.destroy();
         };
     });
@@ -1585,6 +1639,25 @@ GameScene.update=function(t) {
         shieldCheck(himShot);
         offscreenCheck(himShot);
         if (gameFrame%2==0) himShot.tint=himShot.tint==0xff0000?0xff00ff:0xff0000;
+    });
+    scene.children.list.filter(obj=>keyTagged(obj, "toastProjectile")).forEach(toast=>{
+        toast.data.values.timer+=T-lastT;
+        if (toast.data.values.timer>=500) {
+            toast.setData("timer", 0);
+            if (toast.texture.key!="toastProjectileBurnt") {
+                toast.setData("timer", 0);
+                switch (toast.texture.key) {
+                    case "toastProjectile":
+                        toast.setTexture("toastProjectileToasted");
+                        break;
+                    case "toastProjectileToasted":
+                        toast.setTexture("toastProjectileBurnt");
+                        break;
+                };
+            };
+        };
+        shieldCheck(toast);
+        offscreenCheck(toast);
     });
     if (onionState.slice(0,4)=="Idle") {
         if (gameFrame%30==0) onionFrame++;
@@ -1896,9 +1969,6 @@ GameScene.update=function(t) {
                             enemyActTimer=0;
                             doBrockAttack();
                         };
-                        if (!scene.children.getByName("pewPewer")) { // THIS IS STUPID AND DUMB!
-                            makePewPewer();
-                        };
                         break;
                     case "boulderBorg": // BOULDER BORG FIGHT
                         if (enemyHp<=0&&!enemyDead) { // ON DEATH
@@ -2189,6 +2259,44 @@ GameScene.update=function(t) {
                             playerHit();
                         };
                         break;
+                    case "toast": // TOAST FIGHT
+                        if (!enemyDead&&enemyHp<=0) { // ON DEATH
+                            enemyDead=true;
+                            enemy.setTexture("toastWoah");
+                        };
+                        if (!enemyDead&&enemyState==0) {
+                            if (enemyActTimer>=500&&enemy.texture.key=="toastWoah") { // ON DASH
+                                enemy.setTexture("toastIdle2");
+                                enemy.rotation=Phaser.Math.Angle.BetweenPoints(enemy, player);
+                                enemy.body.velocity.x=400*Math.cos(enemy.rotation);
+                                enemy.body.velocity.y=400*Math.sin(enemy.rotation);
+                            };
+                            if (enemyActTimer>=1000) { // ON START CHARGEUP
+                                enemy.body.velocity.x=0;
+                                enemy.body.velocity.y=0;
+                                enemy.setTexture("toastAtk1");
+                                enemyActTimer=0;
+                                enemyState=1;
+                                enemyData.chargeState=1;
+                                enemy.rotation=Phaser.Math.Angle.BetweenPoints(enemy, player)+Math.PI/2;
+                            };
+                        };
+                        if (!enemyDead&&enemyState==1) { // CHARGEUP
+                            if (enemyActTimer>=200) {
+                                if (enemy.texture.key!="toastAtk3") { // ON CHARGE ADVANCE
+                                    enemyActTimer=0;
+                                    enemyData.chargeState++;
+                                    enemy.setTexture(`toastAtk${enemyData.chargeState}`);
+                                } else { // ON FIRE
+                                    enemyData.chargeState=0;
+                                    enemyState=0;
+                                    enemyActTimer=0;
+                                    shootToast();
+                                    enemy.setTexture("toastWoah");
+                                };
+                            };
+                        };
+                        break;
                     case "him": // HIM FIGHT
                         if (enemyHp<=0&&!enemyDead) {
                             enemyDead=true;
@@ -2393,6 +2501,9 @@ function mouseDown(e) {
                     case "glorkIdleR":
                         goToFight("glork");
                         break;
+                    case "toastIdle1":
+                        goToFight("toast");
+                        break;
                 };
             }; 
         });
@@ -2568,6 +2679,13 @@ function tryOpenBoard() {
         temp.setData("isBoardCharacter", true);
         temp.scale=2;
         if (beatenEnemies.includes("glork")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
+        temp=scene.add.sprite(371, 208, "toastIdle1");
+        temp.setData("isBoardCharacter", true);
+        temp.scale=2;
+        if (beatenEnemies.includes("toast")) {
             temp.setData("defeated", true);
             temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
         };
@@ -2759,6 +2877,14 @@ function goToFight(fight) {
             enemy.scale=2;
             enemy.y=ground.body.top-enemy.body.height;
             break;
+        case "toast":
+            enemyData={
+                chargeState: 0
+            };
+            enemy.scale=2;
+            enemy.y=ground.body.top-enemy.body.height;
+            enemy.body.allowGravity=false;
+            break;
         case "him":
             enemy.body.allowGravity=false;
             enemy.scale=.25;
@@ -2886,6 +3012,26 @@ function initFight() {
             scene.time.delayedCall(1000, ()=>{
                 enemyActTimer=1000;
                 endFightInit();
+            });
+            break;
+        case "toast":
+            scene.physics.world.removeCollider(enemyGroundCollider);
+            enemy.setTexture(`toastAtk1`);
+            enemy.y=ground.body.top-enemy.getBounds().height/2;
+            scene.time.delayedCall(200, ()=>{
+                enemy.setTexture(`toastAtk2`);
+                enemy.y=ground.body.top-enemy.getBounds().height/2;
+                scene.time.delayedCall(200, ()=>{
+                    enemy.setTexture(`toastAtk3`);
+                    enemy.y=ground.body.top-enemy.getBounds().height/2;
+                    scene.time.delayedCall(200, ()=>{
+                        enemy.setTexture(`toastWoah`);
+                        enemy.y=ground.body.top-enemy.getBounds().height/2;
+                        shootToast();
+                        enemyActTimer=0;
+                        endFightInit();
+                    });
+                });
             });
             break;
         case "him":
@@ -3246,6 +3392,14 @@ function initPhase2() {
             "Stay safe, man."
         ]
     ];
+};
+function shootToast() {
+    temp=scene.physics.add.sprite(enemy.x, enemy.y, "toastProjectile");
+    temp.depth=enemy.depth-1;
+    temp.body.velocity.x=400*Math.cos(enemy.rotation-Math.PI/2);
+    temp.body.velocity.y=400*Math.sin(enemy.rotation-Math.PI/2);
+    temp.rotation=enemy.rotation;
+    temp.setData("timer", 0);
 };
 function makeHimShot(xdir, ydir, at) {
     temp=scene.physics.add.sprite(at.x, at.y, "himShot");
