@@ -955,6 +955,101 @@ let assetIndex=[
         id: "toastProjectileBurnt",
         url: "https://zkayns.github.io/reduxredux/assets/toastProjectileBurnt.png"
     },
+    {
+        name: "Chet Gun 1",
+        id: "chetGun1",
+        url: "https://zkayns.github.io/reduxredux/assets/chetGun1.png"
+    },
+    {
+        name: "Chet Gun 2",
+        id: "chetGun2",
+        url: "https://zkayns.github.io/reduxredux/assets/chetGun2.png"
+    },
+    {
+        name: "Chet Gun 3",
+        id: "chetGun3",
+        url: "https://zkayns.github.io/reduxredux/assets/chetGun3.png"
+    },
+    {
+        name: "Chet Gun 4",
+        id: "chetGun4",
+        url: "https://zkayns.github.io/reduxredux/assets/chetGun4.png"
+    },
+    {
+        name: "Chet Gun 5",
+        id: "chetGun5",
+        url: "https://zkayns.github.io/reduxredux/assets/chetGun5.png"
+    },
+    {
+        name: "Chet Gun 6",
+        id: "chetGun6",
+        url: "https://zkayns.github.io/reduxredux/assets/chetGun6.png"
+    },
+    {
+        name: "Chet Gun 7",
+        id: "chetGun7",
+        url: "https://zkayns.github.io/reduxredux/assets/chetGun7.png"
+    },
+    {
+        name: "Chet Gun 8",
+        id: "chetGun8",
+        url: "https://zkayns.github.io/reduxredux/assets/chetGun8.png"
+    },
+    {
+        name: "Chet Drive L 1",
+        id: "chetDriveL1",
+        url: "https://zkayns.github.io/reduxredux/assets/chetDriveL1.png"
+    },
+    {
+        name: "Chet Drive L 2",
+        id: "chetDriveL2",
+        url: "https://zkayns.github.io/reduxredux/assets/chetDriveL2.png"
+    },
+    {
+        name: "Chet Drive L 3",
+        id: "chetDriveL3",
+        url: "https://zkayns.github.io/reduxredux/assets/chetDriveL3.png"
+    },
+    {
+        name: "Chet Drive L 4",
+        id: "chetDriveL4",
+        url: "https://zkayns.github.io/reduxredux/assets/chetDriveL4.png"
+    },
+    {
+        name: "Chet Anger",
+        id: "chetAnger",
+        url: "https://zkayns.github.io/reduxredux/assets/chetAnger.png"
+    },
+    {
+        name: "Chet Fire",
+        id: "chetFire",
+        url: "https://zkayns.github.io/reduxredux/assets/chetFire.png"
+    },
+    {
+        name: "Chet Fire 2",
+        id: "chetFire2",
+        url: "https://zkayns.github.io/reduxredux/assets/chetFire2.png"
+    },
+    {
+        name: "Chet Goggle",
+        id: "chetGoggle",
+        url: "https://zkayns.github.io/reduxredux/assets/chetGoggle.png"
+    },
+    {
+        name: "Chet Look",
+        id: "chetLook",
+        url: "https://zkayns.github.io/reduxredux/assets/chetLook.png"
+    },
+    {
+        name: "Cone",
+        id: "cone",
+        url: "https://zkayns.github.io/reduxredux/assets/cone.png"
+    },
+    {
+        name: "Hills",
+        id: "hills",
+        url: "https://zkayns.github.io/reduxredux/assets/hills.png"
+    }
 ];
 let phase2=false;
 let emitters={};
@@ -1236,6 +1331,15 @@ let fights={
         startSpriteKey: "toastIdle1",
         musicKey: "glorkBgm"
     },
+    chet: {
+        name: "Chet",
+        spriteTag: "chet",
+        hp: 15,
+        startX: 584,
+        startY: 344,
+        startSpriteKey: "chetDriveL1",
+        musicKey: "glorkBgm"
+    },
     him: {
         name: "Him",
         spriteTag: "him",
@@ -1494,8 +1598,14 @@ GameScene.update=function(t) {
         beatenEnemies.includes("boulderBorg"),
         beatenEnemies.includes("dad")
     ].every(i=>i);
-    canMove=!(jimOpen+transitioningIntoFight+boardOpen+dead+dialogOpen);
-    player.setVelocityX((-bindIsDown(controls.player.moveLeft)*(playerSpeed+boughtShopItems.includes("shoes")*60)+bindIsDown(controls.player.moveRight)*(playerSpeed+boughtShopItems.includes("shoes")*60))*canMove);
+    canMove=[
+        jimOpen,
+        transitioningIntoFight,
+        boardOpen,
+        dead,
+        dialogOpen
+    ].every(i=>!i);
+    player.body.velocity.x=(-bindIsDown(controls.player.moveLeft)*(playerSpeed+boughtShopItems.includes("shoes")*60)+bindIsDown(controls.player.moveRight)*(playerSpeed+boughtShopItems.includes("shoes")*60))*canMove;
     playerRect=player.getBounds();
     playerRect.height/=2;
     playerRect.y+=playerRect.height/1.25;
@@ -1675,6 +1785,16 @@ GameScene.update=function(t) {
         shieldCheck(toast);
         offscreenCheck(toast);
     });
+    scene.children.list.filter(obj=>keyTagged(obj, "cone")).forEach(cone=>{
+        if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, cone.getBounds())) {
+            playerHit();
+            cone.destroy();
+            return false;
+        };
+        cone.rotation+=Math.PI/4;
+        shieldCheck(cone);
+        offscreenCheck(cone);
+    });
     if (onionState.slice(0,4)=="Idle") {
         if (gameFrame%30==0) onionFrame++;
         onionFrame=onionFrame%2;
@@ -1776,6 +1896,7 @@ GameScene.update=function(t) {
                     beatenEnemies.push(currentFight);
                 };
                 if (enemyDead&&player.body.right>=scene.game.canvas.width) {
+                    scene.children.getByName("hills")?.destroy();
                     leaveFight();
                     break;
                 };
@@ -2325,6 +2446,38 @@ GameScene.update=function(t) {
                             };
                         };
                         break;
+                    case "chet": // CHET FIGHT
+                        if (enemyHp<=0&&!enemyDead) { // ON DEATH
+                            enemyDead=true;
+                            scene.children.getByName("hills").body.velocity.x=0;
+                        };
+                        if (!enemyDead) { // DURING FIGHT
+                            temp=scene.children.getByName("hills");
+                            temp.body.velocity.x=300;
+                            if (temp.x>=720) temp.x=scene.game.canvas.width/2;
+                            if (!enemy.texture.key.includes("chetFire")) enemy.setTexture(`chetDriveL${Math.floor(gameFrame/4)%2+3}`);
+                            enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                            enemy.y=ground.body.top-enemy.getBounds().height/2;
+                            player.body.velocity.x-=50;
+                        };
+                        if (!enemyDead&&enemyActTimer>=1000) { // ON FIRE CONE
+                            fireCone();
+                            enemy.setTexture(`chetFire`);
+                            enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                            enemy.y=ground.body.top-enemy.getBounds().height/2;
+                            scene.time.delayedCall(64, ()=>{
+                                enemy.setTexture(`chetFire2`);
+                                enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                                enemy.y=ground.body.top-enemy.getBounds().height/2;
+                                scene.time.delayedCall(64, ()=>{
+                                    enemy.setTexture(`chetDriveL3`);
+                                    enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                                    enemy.y=ground.body.top-enemy.getBounds().height/2;
+                                });
+                            });
+                            enemyActTimer=0;
+                        };
+                        break;
                     case "him": // HIM FIGHT
                         if (enemyHp<=0&&!enemyDead) {
                             enemyDead=true;
@@ -2532,6 +2685,9 @@ function mouseDown(e) {
                     case "toastIdle1":
                         goToFight("toast");
                         break;
+                    case "chetAnger":
+                        goToFight("chet");
+                        break;
                 };
             }; 
         });
@@ -2714,6 +2870,13 @@ function tryOpenBoard() {
         temp.setData("isBoardCharacter", true);
         temp.scale=2;
         if (beatenEnemies.includes("toast")) {
+            temp.setData("defeated", true);
+            temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
+        };
+        temp=scene.add.sprite(490, 196, "chetAnger");
+        temp.setData("isBoardCharacter", true);
+        temp.scale=1.5;
+        if (beatenEnemies.includes("chet")) {
             temp.setData("defeated", true);
             temp.postFX.addGradient(0x000000, 0x000000, .25, 0, 0, 1, 1, 0);
         };
@@ -2915,6 +3078,16 @@ function goToFight(fight) {
             enemy.body.allowGravity=false;
             enemy.depth=ground.depth+2;
             break;
+        case "chet":
+            temp=scene.physics.add.sprite(scene.game.canvas.width/2, 360, "hills");
+            temp.body.allowGravity=false;
+            temp.postFX.addColorMatrix().brightness(.5);
+            temp.depth=ground.depth-1;
+            temp.name="hills";
+            temp.scale=3;
+            enemy.scale=2;
+            enemy.y=ground.body.top-enemy.body.height;
+            break;
         case "him":
             enemy.body.allowGravity=false;
             enemy.scale=.25;
@@ -3061,6 +3234,30 @@ function initFight() {
                         enemyActTimer=0;
                         endFightInit();
                     });
+                });
+            });
+            break;
+        case "chet":
+            scene.time.delayedCall(500, ()=>{
+                enemy.setTexture("chetGoggle");
+                enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                enemy.y=ground.body.top-enemy.getBounds().height/2;
+                scene.time.delayedCall(500, ()=>{
+                    enemy.setTexture("chetLook");
+                    enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                    enemy.y=ground.body.top-enemy.getBounds().height/2;
+                    scene.time.delayedCall(1000, ()=>{
+                        enemy.setTexture("chetAnger");
+                        enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                        enemy.y=ground.body.top-enemy.getBounds().height/2;
+                        scene.time.delayedCall(500, ()=>{
+                            enemy.setTexture("chetDriveL3");
+                            enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                            enemy.y=ground.body.top-enemy.getBounds().height/2;
+                            enemyActTimer=0;
+                            endFightInit();
+                        });
+                    }); 
                 });
             });
             break;
@@ -3251,7 +3448,8 @@ function isEnemyProjectile(o) {
         keyTagged(o, "magicBall"),
         keyTagged(o, "pewPew", 6),
         keyTagged(o, "zap"),
-        keyTagged(o, "toastProjectile")
+        keyTagged(o, "toastProjectile"),
+        keyTagged(o, "cone")
     ].some(i=>i);
 };
 function isEnemyShockwave(o) {
@@ -3450,6 +3648,11 @@ function initPhase2() {
             "Stay safe, man."
         ]
     ];
+};
+function fireCone() {
+    temp=scene.physics.add.sprite(enemy.x, enemy.y, "cone");
+    temp.body.velocity.x=-300-Math.random()*300;
+    temp.body.velocity.y=-100-Math.random()*50;
 };
 function shootToast() {
     temp=scene.physics.add.sprite(enemy.x, enemy.y, "toastProjectile");
