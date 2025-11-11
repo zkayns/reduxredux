@@ -1653,7 +1653,7 @@ GameScene.update=function(t) {
     });
     scene.children.list.filter(obj=>keyTagged(obj, "toastProjectile")).forEach(toast=>{
         if (Phaser.Geom.Intersects.RectangleToRectangle(playerRect, toast.getBounds())) {
-            playerHit();
+            if (!enemyDead) playerHit();
             toast.destroy();
             return false;
         };
@@ -2278,10 +2278,19 @@ GameScene.update=function(t) {
                     case "toast": // TOAST FIGHT
                         if (!enemyDead&&enemyHp<=0) { // ON DEATH
                             enemyDead=true;
+                            enemy.setCollideWorldBounds(false);
                             enemy.body.velocity.x=0;
                             enemy.body.velocity.y=0;
                             enemy.body.allowGravity=true;
+                            enemyActTimer=0;
                             enemy.setTexture("toastWoah");
+                        };
+                        if (enemyDead) { // AFTER DEATH
+                            enemy.rotation+=Math.PI/8;
+                            if (enemyActTimer>=125) {
+                                shootToast();
+                                enemyActTimer=0;
+                            };
                         };
                         if (!enemyDead&&enemyState==0) {
                             if (enemyActTimer>=500&&enemy.texture.key=="toastWoah") { // ON DASH
