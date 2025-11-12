@@ -2450,6 +2450,26 @@ GameScene.update=function(t) {
                         if (enemyHp<=0&&!enemyDead) { // ON DEATH
                             enemyDead=true;
                             scene.children.getByName("hills").body.velocity.x=0;
+                            for (let i in new Uint8Array(32)) {
+                                scene.time.delayedCall((1000/60)*i, ()=>{
+                                    enemy.setTexture(`chetDriveL${i%2+3}`);
+                                    enemy.body.setSize(enemy.getBounds().width/2, enemy.getBounds().height/2);
+                                    enemy.y=ground.body.top-enemy.getBounds().height/2;
+                                });
+                            };
+                            scene.time.delayedCall((1000/60)*32, ()=>{
+                                enemy.setTexture("chetAnger");
+                                enemy.setCollideWorldBounds(false);
+                                enemy.body.velocity.y=-1200;
+                                enemyData["kablam"]=true;
+                            });
+                        };
+                        if (enemyDead) { // AFTER DEATH
+                            if (enemyData?.["kablam"]) enemy.rotation+=Math.PI/4;
+                            if (enemy.body.bottom<=0) {
+                                enemy.body.allowGravity=false;
+                                enemy.alpha=0;
+                            };
                         };
                         if (!enemyDead) { // DURING FIGHT
                             temp=scene.children.getByName("hills");
