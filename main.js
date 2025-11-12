@@ -1198,7 +1198,7 @@ let controls={
         debug: {
             initPhase2: ["="],
             bigMoney: [";"],
-            //him: ["H"],
+            him: ["H"],
             killEnemy: ["k"]
         }
     }
@@ -1220,7 +1220,7 @@ let hitEffect;
 let playerHitEffect;
 let devilCreated=false;
 let beatenEnemies=new Array();
-let cutsceneSkip=true;
+let cutsceneSkip=false;
 let MainMenuScene={
     key: "MainMenuScene",
     physics: physics,
@@ -3684,6 +3684,7 @@ function shootToast() {
 };
 function makeHimShot(xdir, ydir, at) {
     temp=scene.physics.add.sprite(at.x, at.y, "himShot");
+    temp.postFX.addBloom();
     temp.body.allowGravity=false;
     temp.body.velocity.x=300*xdir;
     temp.body.velocity.y=300*ydir;
