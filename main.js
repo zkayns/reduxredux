@@ -1054,6 +1054,7 @@ let assetIndex=[
 let phase2=false;
 let emitters={};
 let T=0;
+let iddqd=false;
 let music;
 let onionLanded=false;
 let lastDirection=1;
@@ -1129,6 +1130,17 @@ let himDialog=[
     "You have done well, Big Onion.",
     "But now... it is time to meet your maker."
 ];
+let jimStuff=[
+    "daJim",
+    "jimTextbox",
+    "pineappleWhoManagesDaJim",
+    "money",
+    "exitSign"
+];
+let fightUiStuff=[
+    "playerUi",
+    "enemyUi"
+];
 let onionFrame=1;
 let onionState="IdleR";
 let nullified=false;
@@ -1145,6 +1157,7 @@ let playerTouchingBoard=false;
 let playerTouchingJim=false;
 let playerTouchingTomato=false;
 let talkingToTomato=false;
+let canFightHim=false;
 let enemy;
 let enemyActTimer=0;
 let enemyState=0;
@@ -1168,6 +1181,7 @@ let daJim;
 let jimOpen=false;
 let enemyData;
 let himMatrix;
+let debugText;
 let boughtShopItems=new Array();
 let physics={
     default: 'arcade',
@@ -1199,10 +1213,13 @@ let controls={
             initPhase2: ["="],
             bigMoney: [";"],
             him: ["H"],
-            killEnemy: ["k"]
+            killEnemy: ["k"],
+            hitbox: ["i"],
+            gameFrame: ["f"]
         }
     }
 };
+let showPlayerHitbox=false;
 let currentFight;
 let scene;
 let jumps=0;
@@ -1375,7 +1392,7 @@ let shopItems={
         name: "Cap Life",
         spriteKey: "capLife",
         description: "Makes you not die by adding 1 to your HP cap. Caps at 20",
-        cost: 2,
+        cost: 1,
         rebuyable: true
     },
     shoes: {
@@ -1400,7 +1417,7 @@ let shopItems={
         name: "Really Hot Sauce",
         spriteKey: "reallyHotSauce",
         description: "Makes your charm & up charm cooldowns a quarter of a second shorter",
-        cost: 3
+        cost: 2
     },
     shield: {
         name: "Shield",
@@ -1563,6 +1580,10 @@ GameScene.preload=function() {
     scene.input.on("pointerdown", mouseDown);
 };
 GameScene.create=function() {
+    debugText=scene.add.text(0, 0, ``, {
+        color: "#00FF00",
+        padding: 5
+    });
     player=scene.physics.add.sprite(0, 0, "onionIdleR2").setCollideWorldBounds(true);
     player.body.height*=1.5;
     player.body.width*=1.5;
@@ -1575,9 +1596,31 @@ GameScene.create=function() {
     player.x=player.body.width;
     music=scene.sound.add(phase2?"phase2Bgm":"townBgm").setLoop(true);
     music.play();
+    scene.input.keyboard.createCombo("iddqd", {resetOnMatch: true});
+    scene.input.keyboard.on("keycombomatch", e=>{
+        if (debug) cheat("iddqd"); 
+    });
 };
 GameScene.update=function(t) {
     T=t;
+    if (debug) {
+        debugText.text=[
+            `PHASER ${Phaser.VERSION} (LOG_VERSION ${Phaser.LOG_VERSION})`,
+            `GAMEFRAME ${gameFrame}`,
+            `ELAPSED GAMETIME ${T}`,
+            `LOADED TEXTURES ${Object.keys(scene.textures.list).length}`,
+            `SCENE CHILDREN ${scene.children.list.length}`,
+            `MEMORY USAGE ${performance.memory.usedJSHeapSize}/${performance.memory.jsHeapSizeLimit}`,
+            `ONION STATE ${onionState}`,
+            `ONION FRAME ${onionFrame}`,
+            `ENEMY ACT TIMER ${enemyActTimer}`,
+            `ENEMY STATE ${enemyState}`
+        ].join("\n");
+        debugText.depth=10000000000;
+    } else {
+        debugText.text="";
+    };
+    if (iddqd) hp=maxHp;
     Object.keys(emitters).forEach(key=>{
         if (!scene.children.getByName(key)) emitters[key].destroy();
     });
@@ -1598,6 +1641,12 @@ GameScene.update=function(t) {
         beatenEnemies.includes("boulderBorg"),
         beatenEnemies.includes("dad")
     ].every(i=>i);
+    canFightHim=[
+        beatenEnemies.includes("glunk"),
+        beatenEnemies.includes("glork"),
+        beatenEnemies.includes("toast"),
+        beatenEnemies.includes("chet")
+    ].every(i=>i);
     canMove=[
         jimOpen,
         transitioningIntoFight,
@@ -1609,8 +1658,8 @@ GameScene.update=function(t) {
     playerRect=player.getBounds();
     playerRect.height/=2;
     playerRect.y+=playerRect.height/1.25;
-    /*scene.children.getByName("hitbox")?.destroy();
-    scene.add.rectangle(playerRect.centerX, playerRect.centerY, playerRect.width, playerRect.height, 0xff0000).setName("hitbox");*/
+    scene.children.getByName("hitbox")?.destroy();
+    if (showPlayerHitbox) scene.add.rectangle(playerRect.centerX, playerRect.centerY, playerRect.width, playerRect.height, 0xff0000).setName("hitbox");
     onionState=`${((bindIsDown(controls.player.moveLeft)||bindIsDown(controls.player.moveRight))*canMove)?"Walk":"Idle"}${lastDirection?"R":"L"}`;
     if (jimOpen) {
         document.getElementById("money").innerHTML=`$${coins}`;
@@ -1857,19 +1906,19 @@ GameScene.update=function(t) {
             scene.children.getByName("tomato").y=ground.body.top-scene.children.getByName("tomato").getBounds().height/2;
             scene.children.list.forEach(obj=>{
                 if (keyTagged(obj, "finaleNote")) {
-                    obj.x=obj.getData("initPos").x+Math.sign(Math.random()-.5)*3;
-                    obj.y=obj.getData("initPos").y+Math.sign(Math.random()-.5)*3;
+                    obj.x=obj.getData("initPos").x+Math.sign(Math.random()-.5)*(3+canFightHim*3);
+                    obj.y=obj.getData("initPos").y+Math.sign(Math.random()-.5)*(3+canFightHim*3);
                     if (gameFrame%3==0) {
                         obj.data.values.matrix.reset();
                         obj.data.values.matrix.brightness(Math.random()>.5?0:100);
                     };
                 };
-                if (obj.getData?.("isBoardCharacter")&&!obj.getData("defeated")) {
+                if (obj.getData?.("isBoardCharacter")&&!obj.getData("defeated")&&!keyTagged(obj, "finaleNote")) {
                     if (Phaser.Geom.Intersects.CircleToRectangle(new Phaser.Geom.Circle(scene.input.mousePointer.x, scene.input.mousePointer.y, 1), obj.getBounds())&&!obj.getData("hasHoverEffect")) {
                         boardHoverEffect=obj.postFX.addGradient(0xffffff, 0xffffff, .75, 0, 0, 1, 1, 0);
                         obj.setData("hasHoverEffect", true);
                     };
-                    if (obj.getData("hasHoverEffect")&&!Phaser.Geom.Intersects.CircleToRectangle(new Phaser.Geom.Circle(scene.input.mousePointer.x, scene.input.mousePointer.y, 1), obj.getBounds())) {
+                    if (!keyTagged(obj, "finaleNote")&&obj.getData("hasHoverEffect")&&!Phaser.Geom.Intersects.CircleToRectangle(new Phaser.Geom.Circle(scene.input.mousePointer.x, scene.input.mousePointer.y, 1), obj.getBounds())) {
                         obj.postFX.clear();
                         obj.setData("hasHoverEffect", false);  
                     };
@@ -2653,12 +2702,14 @@ function keyDown(e) {
     jimOpen&&controls.player.exit.includes(e.key)?tryOpenJim():"";
     boardOpen&&controls.player.exit.includes(e.key)?tryOpenBoard():"";
     controls.game.screenshot.includes(e.key)?takeScreenshot():"";
-    controls.game.toggleDebug.includes(e.key)?debug=!debug:"";
+    controls.game.toggleDebug.includes(e.key)?toggleDebug():"";
     if (debug) {
-        controls.game.debug.initPhase2.includes(e.key)?initPhase2():"";
-        controls.game.debug.bigMoney.includes(e.key)?coins=10000:"";
+        controls.game.debug.initPhase2.includes(e.key)?cheat("phase2"):"";
+        controls.game.debug.bigMoney.includes(e.key)?cheat("money"):"";
         //controls.game.debug.him.includes(e.key)?goToFight("him"):"";
-        controls.game.debug.killEnemy.includes(e.key)?enemyHp=0:"";
+        controls.game.debug.killEnemy.includes(e.key)?cheat("kill"):"";
+        controls.game.debug.hitbox.includes(e.key)?cheat("hitbox"):"";
+        controls.game.debug.gameFrame.includes(e.key)?cheat("gameframe"):"";
     };
 };
 function keyUp(e) {
@@ -2707,6 +2758,10 @@ function mouseDown(e) {
                         break;
                     case "chetAnger":
                         goToFight("chet");
+                        break;
+                    case "finaleNote":
+                        if (!canFightHim) break;
+                        goToFight("him");
                         break;
                 };
             }; 
@@ -2803,7 +2858,6 @@ function urlOfAsset(name) {
 function tryOpenBoard() {
     if (boardOpen) {
         boardUi.destroy();
-        scene.children.getByName("finaleNote")?.destroy();
         scene.children.list.filter(c=>c.getData?.("isBoardCharacter")).forEach(c=>c.destroy());
         boardOpen=false;
         return false;
@@ -2870,8 +2924,10 @@ function tryOpenBoard() {
         temp=scene.add.sprite(491, 347, "finaleNote");
         temp.setData("initPos", {x: temp.x, y: temp.y});
         temp.name="finaleNote";
+        temp.setData("isBoardCharacter", true);
         temp.setData("matrix", temp.postFX.addColorMatrix());
         temp.scale=.7;
+        if (canFightHim) temp.postFX.addBloom();  
         temp=scene.add.sprite(142, 196, "glunkAnryL");
         temp.setData("isBoardCharacter", true);
         temp.scale=2;
@@ -2905,11 +2961,7 @@ function tryOpenBoard() {
 function tryOpenJim() {
     scene.sound.stopAll();
     if (jimOpen) {
-        document.getElementById("daJim")?.remove();
-        document.getElementById("jimTextbox")?.remove();
-        document.getElementById("pineappleWhoManagesDaJim")?.remove();
-        document.getElementById("money")?.remove();
-        document.getElementById("exitSign")?.remove();
+        scene.children.list.filter(obj=>jimStuff.includes(obj?.node?.id)).forEach(obj=>obj.destroy());
         music=scene.sound.add(phase2?"phase2Bgm":"townBgm").setLoop(true);
         music.play();
         jimOpen=false;
@@ -2995,7 +3047,6 @@ function goToFight(fight) {
     board?.destroy();
     boardUi?.destroy();
     daJim?.destroy();
-    scene.children.getByName("finaleNote")?.destroy();
     scene.children.getByName("tomato")?.destroy();
     damageTaken=false;
     nullified=false;
@@ -3337,6 +3388,7 @@ function leaveFight() {
     };
     if (boughtShopItems.includes("goldRing")) coins++;
     scene.children.list.filter(obj=>shouldDespawn(obj)).forEach(obj=>obj?.destroy());
+    scene.children.list.filter(obj=>fightUiStuff.includes(obj?.node?.id)).forEach(obj=>obj.destroy());
 };
 function loadGameAssets() {
     assetIndex.forEach((asset)=>{
@@ -3696,4 +3748,31 @@ function hitCheck(thing1, thing2) {
 };
 function swapDir(dir) {
     return "LRL"["LRL".indexOf(dir)+1];
+};
+function cheat(what) {
+    switch (what) {
+        case "money":
+            coins=10000;
+            break;
+        case "kill":
+            enemyHp=0;
+            break;
+        case "iddqd":
+            iddqd=!iddqd;
+            break;
+        case "hitbox":
+            showPlayerHitbox=!showPlayerHitbox;
+            break;
+        case "phase2":
+            if (!phase2) {
+                initPhase2();
+            };
+            break;
+        case "gameframe":
+            break;
+    };
+    return true;
+};
+function toggleDebug() {
+    debug=!debug;
 };
